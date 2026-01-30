@@ -1,31 +1,16 @@
 <%# Issue Detail %>
 
-<div class="page-header">
-  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-    <div>
-      <h1 class="page-title"><%= @issue.title %></h1>
-      <p class="page-subtitle">
-        On <%= @product_page.title %> • 
-        <span class="badge badge-<%= @issue.severity == 'high' ? 'critical' : @issue.severity %>">
-          <%= @issue.severity_label %>
-        </span>
-        <span class="badge badge-<%= @issue.status == 'resolved' ? 'healthy' : (@issue.status == 'acknowledged' ? 'warning' : 'critical') %>">
-          <%= @issue.status.capitalize %>
-        </span>
-      </p>
-    </div>
-    <div style="display: flex; gap: 12px;">
-      <%= link_to issues_path(host: @host), class: "button-secondary" do %>
-        ← Back to Issues
-      <% end %>
-      <% if @issue.status == "open" %>
-        <%= button_to acknowledge_issue_path(@issue, host: @host), method: :post, class: "button-secondary", form: { style: "display: inline;" } do %>
-          Acknowledge
-        <% end %>
-      <% end %>
-    </div>
-  </div>
-</div>
+<s-page heading="<%= @issue.title %>">
+  <% if @issue.status == "open" %>
+    <s-button slot="primary-action" onclick="document.getElementById('acknowledge-form').submit()">Acknowledge</s-button>
+  <% end %>
+  <s-link slot="breadcrumb-actions" href="<%= issues_path(host: @host) %>">Issues</s-link>
+  <s-badge slot="accessory" tone="<%= @issue.status == 'resolved' ? 'success' : (@issue.status == 'acknowledged' ? 'warning' : 'critical') %>"><%= @issue.status.capitalize %></s-badge>
+</s-page>
+
+<!-- Hidden acknowledge form for the button -->
+<%= form_with url: acknowledge_issue_path(@issue, host: @host), method: :post, id: "acknowledge-form", style: "display: none;" do %>
+<% end %>
 
 <!-- Issue Details Card -->
 <div class="stat-card" style="margin-bottom: 24px;">
@@ -58,6 +43,15 @@
       </p>
     </div>
   </div>
+</div>
+
+<!-- Product Info -->
+<div class="stat-card" style="margin-bottom: 24px;">
+  <h3 style="font-size: 16px; margin: 0 0 16px 0;">Affected Product</h3>
+  <p style="margin: 0;">
+    <%= link_to @product_page.title, product_page_path(@product_page, host: @host), style: "color: #008060; text-decoration: none; font-weight: 500;" %>
+    <span style="color: #6d7175;"> (<%= @product_page.handle %>)</span>
+  </p>
 </div>
 
 <!-- What to do -->

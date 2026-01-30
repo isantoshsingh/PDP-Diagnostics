@@ -1,26 +1,14 @@
 <%# Product Page Detail %>
 
-<div class="page-header">
-  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-    <div>
-      <h1 class="page-title"><%= @product_page.title %></h1>
-      <p class="page-subtitle">
-        /<%= @product_page.handle %> • 
-        <span class="badge badge-<%= @product_page.status == 'healthy' ? 'healthy' : (@product_page.status == 'critical' ? 'critical' : (@product_page.status == 'warning' ? 'warning' : 'pending')) %>">
-          <%= @product_page.status.capitalize %>
-        </span>
-      </p>
-    </div>
-    <div style="display: flex; gap: 12px;">
-      <%= link_to product_pages_path(host: @host), class: "button-secondary" do %>
-        ← Back to Pages
-      <% end %>
-      <%= button_to rescan_product_page_path(@product_page, host: @host), method: :post, class: "button-primary", form: { style: "display: inline;" } do %>
-        Rescan Now
-      <% end %>
-    </div>
-  </div>
-</div>
+<s-page heading="<%= @product_page.title %>">
+  <s-button slot="primary-action" onclick="document.getElementById('rescan-form').submit()">Rescan Now</s-button>
+  <s-link slot="breadcrumb-actions" href="<%= product_pages_path(host: @host) %>">Monitored Pages</s-link>
+  <s-badge slot="accessory" tone="<%= @product_page.status == 'healthy' ? 'success' : (@product_page.status == 'critical' ? 'critical' : 'warning') %>"><%= @product_page.status.capitalize %></s-badge>
+</s-page>
+
+<!-- Hidden rescan form for the button -->
+<%= form_with url: rescan_product_page_path(@product_page, host: @host), method: :post, id: "rescan-form", style: "display: none;" do %>
+<% end %>
 
 <!-- Stats Cards -->
 <div class="card-grid" style="margin-bottom: 24px;">

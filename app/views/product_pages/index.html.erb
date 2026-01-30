@@ -1,25 +1,12 @@
 <%# Product Pages Index - List of monitored PDPs %>
 
-<div class="page-header">
-  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-    <div>
-      <h1 class="page-title">Monitored Pages</h1>
-      <p class="page-subtitle">
-        <%= @product_pages.count %> of <%= @shop.shop_setting&.max_monitored_pages || 5 %> pages monitored
-      </p>
-    </div>
-    <div style="display: flex; gap: 12px;">
-      <%= link_to root_path(host: @host), class: "button-secondary" do %>
-        ← Back to Dashboard
-      <% end %>
-      <% if @can_add_more %>
-        <%= link_to new_product_page_path(host: @host), class: "button-primary" do %>
-          Add Product Page
-        <% end %>
-      <% end %>
-    </div>
-  </div>
-</div>
+<s-page heading="Monitored Pages">
+  <% if @can_add_more %>
+    <s-link slot="primary-action" href="<%= new_product_page_path(host: @host) %>">Add Product</s-link>
+  <% end %>
+  <s-link slot="breadcrumb-actions" href="<%= root_path(host: @host) %>">Dashboard</s-link>
+  <s-badge slot="accessory" tone="info"><%= @product_pages.count %>/<%= @shop.shop_setting&.max_monitored_pages || 5 %></s-badge>
+</s-page>
 
 <div class="issues-list">
   <% if @product_pages.any? %>

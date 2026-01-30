@@ -1,10 +1,10 @@
 <%# Home/Dashboard - App Home Page per Shopify UX guidelines %>
 <%# This is the main dashboard showing PDP health overview %>
 
-<div class="page-header">
-  <h1 class="page-title">Silent Profit</h1>
-  <p class="page-subtitle">Your product page health at a glance</p>
-</div>
+<s-page heading="PDP Diagnostics">
+  <s-link slot="primary-action" href="<%= new_product_page_path(host: @host) %>">Add Products</s-link>
+  <s-link slot="secondary-actions" href="<%= settings_path(host: @host) %>">Settings</s-link>
+</s-page>
 
 <% if @billing_required %>
   <% if @trial_expired %>
@@ -70,16 +70,6 @@
       pages with high severity issues
     </p>
   </div>
-</div>
-
-<!-- Quick Actions -->
-<div style="display: flex; gap: 12px; margin-bottom: 24px;">
-  <%= link_to product_pages_path(host: @host), class: "button-primary" do %>
-    Manage Monitored Pages
-  <% end %>
-  <%= link_to settings_path(host: @host), class: "button-secondary" do %>
-    Settings
-  <% end %>
 </div>
 
 <!-- Open Issues -->

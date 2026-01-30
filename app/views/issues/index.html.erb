@@ -1,16 +1,11 @@
 <%# Issues Index - All issues across monitored pages %>
 
-<div class="page-header">
-  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-    <div>
-      <h1 class="page-title">Issues</h1>
-      <p class="page-subtitle">All detected issues across your monitored pages</p>
-    </div>
-    <%= link_to root_path(host: @host), class: "button-secondary" do %>
-      ← Back to Dashboard
-    <% end %>
-  </div>
-</div>
+<s-page heading="Issues">
+  <s-link slot="breadcrumb-actions" href="<%= root_path(host: @host) %>">Dashboard</s-link>
+  <% if @issues.count > 0 %>
+    <s-badge slot="accessory" tone="<%= @issues.any? { |i| i.status == 'open' } ? 'warning' : 'success' %>"><%= @issues.count %> total</s-badge>
+  <% end %>
+</s-page>
 
 <!-- Filters -->
 <div style="display: flex; gap: 12px; margin-bottom: 16px;">

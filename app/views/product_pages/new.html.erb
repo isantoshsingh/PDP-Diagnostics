@@ -1,16 +1,9 @@
 <%# Add New Product Page - Using Shopify Resource Picker %>
 
-<div class="page-header">
-  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-    <div>
-      <h1 class="page-title">Add Product Pages</h1>
-      <p class="page-subtitle">Select products to monitor (max <%= @remaining_slots %> more)</p>
-    </div>
-    <%= link_to product_pages_path(host: @host), class: "button-secondary" do %>
-      ← Back to Pages
-    <% end %>
-  </div>
-</div>
+<s-page heading="Add Products">
+  <s-link slot="breadcrumb-actions" href="<%= product_pages_path(host: @host) %>">Monitored Pages</s-link>
+  <s-badge slot="accessory" tone="info"><%= @remaining_slots %> slots available</s-badge>
+</s-page>
 
 <div class="stat-card" style="text-align: center; padding: 48px 24px;">
   <div class="empty-state-icon" style="font-size: 64px; margin-bottom: 24px;">📦</div>

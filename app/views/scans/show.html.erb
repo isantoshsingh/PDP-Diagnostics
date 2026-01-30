@@ -1,24 +1,10 @@
 <%# Scan Detail %>
 
-<div class="page-header">
-  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-    <div>
-      <h1 class="page-title">Scan #<%= @scan.id %></h1>
-      <p class="page-subtitle">
-        <%= @product_page.title %> • 
-        <%= @scan.created_at.strftime("%B %d, %Y at %H:%M") %>
-      </p>
-    </div>
-    <div style="display: flex; gap: 12px;">
-      <%= link_to scans_path(host: @host), class: "button-secondary" do %>
-        ← Back to Scans
-      <% end %>
-      <%= link_to product_page_path(@product_page, host: @host), class: "button-secondary" do %>
-        View Page
-      <% end %>
-    </div>
-  </div>
-</div>
+<s-page heading="Scan #<%= @scan.id %>">
+  <s-link slot="secondary-actions" href="<%= product_page_path(@product_page, host: @host) %>">View Product Page</s-link>
+  <s-link slot="breadcrumb-actions" href="<%= scans_path(host: @host) %>">Scan History</s-link>
+  <s-badge slot="accessory" tone="<%= @scan.status == 'completed' ? 'success' : (@scan.status == 'failed' ? 'critical' : 'info') %>"><%= @scan.status.capitalize %></s-badge>
+</s-page>
 
 <!-- Scan Summary -->
 <div class="card-grid" style="margin-bottom: 24px;">
@@ -58,6 +44,25 @@
         —
       <% end %>
     </p>
+  </div>
+</div>
+
+<!-- Scan Info -->
+<div class="stat-card" style="margin-bottom: 24px;">
+  <h3 style="font-size: 16px; margin: 0 0 16px 0;">Scan Details</h3>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+    <div>
+      <p class="stat-card-title">Product</p>
+      <p style="margin: 4px 0 0 0; font-weight: 500;">
+        <%= link_to @product_page.title, product_page_path(@product_page, host: @host), style: "color: #008060; text-decoration: none;" %>
+      </p>
+    </div>
+    <div>
+      <p class="stat-card-title">Scanned At</p>
+      <p style="margin: 4px 0 0 0; font-weight: 500;">
+        <%= @scan.created_at.strftime("%B %d, %Y at %H:%M") %>
+      </p>
+    </div>
   </div>
 </div>
 

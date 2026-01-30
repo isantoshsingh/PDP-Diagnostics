@@ -1,16 +1,11 @@
 <%# Scans Index - Scan history %>
 
-<div class="page-header">
-  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-    <div>
-      <h1 class="page-title">Scan History</h1>
-      <p class="page-subtitle">All scans across your monitored pages</p>
-    </div>
-    <%= link_to root_path(host: @host), class: "button-secondary" do %>
-      ← Back to Dashboard
-    <% end %>
-  </div>
-</div>
+<s-page heading="Scan History">
+  <s-link slot="breadcrumb-actions" href="<%= root_path(host: @host) %>">Dashboard</s-link>
+  <% if @scans.count > 0 %>
+    <s-badge slot="accessory" tone="info"><%= @scans.count %> scans</s-badge>
+  <% end %>
+</s-page>
 
 <div class="issues-list">
   <% if @scans.any? %>
