@@ -1,248 +1,184 @@
-Here is a clean **MVP Specification (Markdown format)** for your new Shopify App idea — ready to paste directly into a ChatGPT Project.
+# Silent Profit — Shopify PDP Monitoring & Diagnostics
+
+Silent Profit is a Shopify app that helps merchants **detect, monitor, and prevent revenue loss** caused by broken product pages (PDPs), app conflicts, theme changes, and hidden frontend issues.
+
+Instead of guessing why conversions dropped, merchants get **clear alerts, diagnostics, and guidance** when something breaks — before revenue is lost.
 
 ---
 
-# 🧩 **Shopify PDP Diagnostics & Monitoring App — MVP Specification**
+## 🚀 Problem
 
-## **1. App Summary**
+Shopify stores break silently all the time due to:
+- App conflicts
+- Theme updates
+- Script injections
+- Liquid errors
+- JavaScript overrides
+- CSS layout shifts
 
-A Shopify app that **scans product pages**, detects common issues (broken add-to-cart, variant selector conflicts, hidden UI, Liquid errors, JS errors), and alerts merchants automatically.
+Merchants usually notice **after revenue drops**.
 
-The MVP focuses on:
+There is no reliable tool that:
+- Monitors PDP health
+- Detects breakage automatically
+- Explains the root cause
+- Alerts immediately
 
-* Automated scanning
-* Detection of high-impact PDP issues
-* Alerts to merchants
-* Simple dashboard showing issues
-
----
-
-## **2. Core MVP Features**
-
-### **2.1 Daily PDP Scan (Automated)**
-
-* Crawl **3–5 most-visited product pages** (Shopify Analytics API, fallback: last created products).
-* Visit each PDP using a headless browser (Playwright/Puppeteer).
-* Check critical functions:
-
-  * Add to Cart button present?
-  * Button clickable?
-  * Variant selector working?
-  * Price visible?
-  * Product media visible?
-  * JS errors on load?
-  * Liquid errors?
-  * Page load time > 4 sec?
+Silent Profit fixes that.
 
 ---
 
-### **2.2 AI Visual Check (Optional in MVP)**
+## 💡 Solution
 
-* Take screenshot of the PDP.
-* Send to Vision Model (e.g., GPT-4o or o4-mini for cost).
-* Ask:
+Silent Profit acts like **monitoring + diagnostics + alerting** for Shopify stores.
 
-  > “Identify if any elements are broken, overlapping, missing, hidden, or not visible to a typical shopper.”
-
-Return:
-
-* Summary of issues
-* Screenshot with bounding boxes (if possible later)
+Think:
+> Datadog + Snyk + PagerDuty for Shopify product pages
 
 ---
 
-### **2.3 Issue Detection (Rules Engine)**
+## ✨ Core Features (Phase 1 - MVP)
 
-A first-version static rules engine:
-
-#### **Check 1 — Add-to-Cart**
-
-* Button missing
-* Button disabled
-* JS click intercepted
-* Wrong selector
-
-#### **Check 2 — Variants**
-
-* Variant dropdown or swatches not visible
-* Changing variant throws JS error
-* Add-to-cart fails for variant
-
-#### **Check 3 — Liquid/Theme Issues**
-
-* “Liquid error: …” on page
-* Missing snippet
-* Section fails to render
-
-#### **Check 4 — UI Breakage**
-
-* Image not loading
-* Main image width < 200px
-* Elements overlapping (vision AI later)
-
-#### **Check 5 — Performance Warning**
-
-* Page load > 4s
-* Script load failures
-* App script errors
+### 🔍 Automated PDP Scanning
+- Daily scan of 3–5 product pages
+- Headless browser checks for:
+  - Add-to-cart functionality
+  - Variant selector errors
+  - Missing price or images
+  - JS errors
+  - Liquid errors
+  - Performance red flags
 
 ---
 
-## **3. Dashboard (Merchant UI)**
-
-### **3.1 Home Page**
-
-**Section: “Today’s PDP Health”**
-
-* Green = No issues
-* Yellow = 1–2 warnings
-* Red = Issues detected
-
-**Section: Last 7 days trend**
-
-* Simple line graph showing number of issues per day.
+### 🧠 Issue Detection Engine
+- Rule-based detection for common breakages
+- Severity scoring (High / Medium / Low)
+- Change detection (today vs yesterday)
 
 ---
 
-### **3.2 Issues Page**
-
-Table with:
-
-* Page URL
-* Issue type
-* Severity: High / Medium / Low
-* First detected date
-* Latest scan date
-* “View Details” → shows screenshot, logs, suggestions
+### 📸 Visual Snapshot
+- Screenshot captured for each scan
+- (Optional) AI visual inspection for UI breakage
 
 ---
 
-### **3.3 Settings**
-
-* Enable/disable daily scan
-* Select product pages to monitor
-* Alert preferences:
-
-  * Email
-  * Shopify notification
-  * Slack (Phase 2)
+### 🚨 Alerts
+- Email alerts for critical issues
+- Shopify admin notifications
+- Clear, human-readable explanations
 
 ---
 
-## **4. Alerts (Critical MVP Feature)**
-
-### When issues are detected:
-
-Send an alert with:
-
-* Product page URL
-* Issue name
-* Short explanation
-* Suggestion
-
-**Example:**
-
-> **⚠ Add-to-Cart Not Working**
-> Detected on: /products/blue-tshirt
-> The Add-to-Cart button is present but unclickable due to a JavaScript error from “VITALS App”.
-> Recommend: disable “Sticky Modal” feature or remove conflicting script.
+### 📊 Simple Dashboard
+- PDP health overview
+- Issue list & detail view
+- 7-day trend
+- Manual rescan button
 
 ---
 
-## **5. MVP Tech Stack**
+## 🏗 Tech Stack
 
 ### Backend
+- Ruby on Rails 8.1
+- Shopify_app gem
+- PostgreSQL
+- Solid Queue (background jobs)
+- Puppeteer Ruby gem
 
-* Ruby on Rails 8.1
-* Shopify_app gem
-* PostgreSQL
-* solid_jobs for scheduled scans
-* Puppeteer Ruby gem
+### Scanning
+- Headless Chromium
+- Screenshot capture
+- JS / network error logging
 
 ### Frontend
+- Shopify Polaris
+- App Bridge (https://shopify.dev/docs/api/app-bridge)
+- ERB (Polaris web components)
 
-* Shopify Polaris web components
-* App Bridge Auth
-
-### AI (optional for MVP)
-
-* Vision: GPT-4o-mini or o4-mini
-* Text: GPT-4o or GPT-5 mini
-
----
-
-## **6. Data to Store (Minimal)**
-
-### Tables:
-
-#### **1) shops**
-
-* shop_id
-* domain
-* plan
-* settings (jsonb)
-
-#### **2) product_pages**
-
-* shop_id
-* product_id
-* url
-* last_status (green/yellow/red)
-* last_scanned_at
-
-#### **3) issues**
-
-* product_page_id
-* issue_type
-* description
-* severity
-* detected_at
-* resolved_at (nullable)
-
-#### **4) scans**
-
-* shop_id
-* product_page_id
-* raw_logs (jsonb)
-* screenshot_url
-* ai_analysis (jsonb)
+### AI (Optional in MVP)
+- Vision model for UI detection
+- Text model for explanation & guidance
 
 ---
 
-## **7. Scanning Logic**
+## 📦 Project Structure (Suggested)
 
-### **Step-by-step**
+```
 
-1. Select target PDPs (top 3–5 by traffic).
-2. Launch headless browser.
-3. Load PDP.
-4. Capture network errors.
-5. Capture JS errors.
-6. Check HTML elements (button, variant selector, price, images).
-7. Screenshot page.
-8. (Optional) Send screenshot to Vision AI.
-9. Create issue objects.
-10. Save results.
-11. Trigger alerts if severity = HIGH.
+/app
+/models
+/controllers
+/views
+/services
+/jobs
+/policies
+/lib
+/scanners
+/detectors
+/alerts
+/ai
+/docs
+README.md
+agent.md
+
+```
 
 ---
 
-## **8. MVP Scope Cut (Very Important)**
+## 📈 Roadmap
 
-### ❌ Out of MVP
+### Phase 1 (MVP)
+- PDP scanning
+- Alerts
+- Dashboard
+- Manual rescan
+- 3–5 monitored pages
 
-* Auto-fix issues
-* In-depth SEO audits
-* Theme code scanning
-* 100+ product scans
-* A/B testing
-* Performance optimization
+### Phase 2 (Scale)
+- Real-time monitoring
+- AI auto-fix suggestions
+- Theme integrity monitoring
+- Agency dashboard
+- Revenue impact estimation
+- Uptime monitoring
 
-### ✔ Included
+### Phase 3 (Dominance)
+- Auto-fix engine
+- Multi-platform (Woo, BigCommerce)
+- Shopify Plus deep integrations
+- Enterprise reliability platform
 
-* **Basic scanning**
-* **Basic AI detection**
-* **Simple Polaris UI**
-* **Alerts**
-* **5 product pages max**
+---
 
+## 🎯 Success Metrics (MVP)
+- 100 installs
+- 20 paid merchants
+- <5% false positives
+- Merchants report saved revenue
+
+---
+
+## 🧭 Philosophy
+
+Silent Profit is built with one principle:
+> **Calm growth beats chaotic growth**
+
+We value:
+- Clarity over features
+- Trust over hype
+- Guidance over automation
+- Long-term reliability over shortcuts
+
+---
+
+## 🤝 Contributing
+This project is currently in private build mode.
+Architecture, scope, and principles are intentionally strict to avoid bloat.
+
+---
+
+## 📄 License
+Private / Proprietary
