@@ -1,0 +1,120 @@
+<%# Settings Page %>
+
+<div class="page-header">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+      <h1 class="page-title">Settings</h1>
+      <p class="page-subtitle">Configure your monitoring preferences</p>
+    </div>
+    <%= link_to root_path(host: @host), class: "button-secondary" do %>
+      ← Back to Dashboard
+    <% end %>
+  </div>
+</div>
+
+<%= form_with model: @settings, url: settings_path(host: @host), method: :patch, local: true do |f| %>
+  <!-- Alert Settings -->
+  <div class="stat-card" style="margin-bottom: 24px;">
+    <h3 style="font-size: 16px; margin: 0 0 24px 0;">Alert Preferences</h3>
+    
+    <div style="margin-bottom: 20px;">
+      <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+        <%= f.check_box :email_alerts_enabled, style: "width: 18px; height: 18px;" %>
+        <div>
+          <p style="margin: 0; font-weight: 500;">Email alerts</p>
+          <p style="margin: 4px 0 0 0; font-size: 13px; color: #6d7175;">
+            Receive email notifications when high-severity issues are detected
+          </p>
+        </div>
+      </label>
+    </div>
+    
+    <div style="margin-bottom: 20px;">
+      <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+        <%= f.check_box :admin_alerts_enabled, style: "width: 18px; height: 18px;" %>
+        <div>
+          <p style="margin: 0; font-weight: 500;">Shopify admin notifications</p>
+          <p style="margin: 4px 0 0 0; font-size: 13px; color: #6d7175;">
+            Receive notifications in your Shopify admin dashboard
+          </p>
+        </div>
+      </label>
+    </div>
+    
+    <div>
+      <label for="shop_setting_alert_email" style="display: block; margin-bottom: 8px; font-weight: 500;">
+        Alert email address
+      </label>
+      <%= f.email_field :alert_email, 
+          placeholder: @shop.shopify_domain, 
+          style: "width: 100%; max-width: 400px; padding: 10px 12px; border: 1px solid #c9cccf; border-radius: 4px; font-size: 14px;",
+          id: "shop_setting_alert_email" %>
+      <p style="margin: 8px 0 0 0; font-size: 13px; color: #6d7175;">
+        Leave blank to use your store's default email
+      </p>
+    </div>
+  </div>
+  
+  <!-- Scan Settings -->
+  <div class="stat-card" style="margin-bottom: 24px;">
+    <h3 style="font-size: 16px; margin: 0 0 24px 0;">Scan Settings</h3>
+    
+    <div>
+      <label for="shop_setting_scan_frequency" style="display: block; margin-bottom: 8px; font-weight: 500;">
+        Scan frequency
+      </label>
+      <%= f.select :scan_frequency, 
+          [["Daily (recommended)", "daily"], ["Weekly", "weekly"]], 
+          {}, 
+          style: "padding: 10px 12px; border: 1px solid #c9cccf; border-radius: 4px; font-size: 14px;",
+          id: "shop_setting_scan_frequency" %>
+      <p style="margin: 8px 0 0 0; font-size: 13px; color: #6d7175;">
+        How often to automatically scan your monitored pages
+      </p>
+    </div>
+  </div>
+  
+  <!-- Billing Info -->
+  <div class="stat-card" style="margin-bottom: 24px;">
+    <h3 style="font-size: 16px; margin: 0 0 24px 0;">Subscription</h3>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+      <div>
+        <p class="stat-card-title">Status</p>
+        <p style="margin: 4px 0 0 0;">
+          <span class="badge badge-<%= @settings.billing_active? ? 'healthy' : 'critical' %>">
+            <%= @settings.billing_status.capitalize %>
+          </span>
+        </p>
+      </div>
+      
+      <% if @settings.trial_active? %>
+        <div>
+          <p class="stat-card-title">Trial ends in</p>
+          <p style="margin: 4px 0 0 0; font-weight: 500;">
+            <%= @settings.trial_days_remaining %> days
+          </p>
+        </div>
+      <% end %>
+      
+      <div>
+        <p class="stat-card-title">Price</p>
+        <p style="margin: 4px 0 0 0; font-weight: 500;">
+          $10/month
+        </p>
+      </div>
+    </div>
+    
+    <% if @settings.trial_active? %>
+      <div style="margin-top: 16px;">
+        <%= link_to "Subscribe now", create_billing_path(host: @host), class: "button-primary" %>
+      </div>
+    <% end %>
+  </div>
+  
+  <!-- Save Button -->
+  <div style="display: flex; gap: 12px;">
+    <%= f.submit "Save Settings", class: "button-primary" %>
+    <%= link_to "Cancel", root_path(host: @host), class: "button-secondary" %>
+  </div>
+<% end %>

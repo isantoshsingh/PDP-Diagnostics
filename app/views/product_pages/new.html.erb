@@ -1,0 +1,54 @@
+<%# Add New Product Page %>
+
+<div class="page-header">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+      <h1 class="page-title">Add Product Page</h1>
+      <p class="page-subtitle">Select a product to monitor</p>
+    </div>
+    <%= link_to product_pages_path(host: @host), class: "button-secondary" do %>
+      ← Back to Pages
+    <% end %>
+  </div>
+</div>
+
+<div class="issues-list">
+  <div class="issues-list-header">
+    <h2 class="issues-list-title">Your Products</h2>
+    <p style="margin: 0; color: #6d7175; font-size: 13px;">
+      Select a product to start monitoring its page
+    </p>
+  </div>
+  
+  <% if @products.any? %>
+    <% @products.each do |product| %>
+      <div class="issue-item" style="cursor: default;">
+        <% if product[:image_url] %>
+          <img src="<%= product[:image_url] %>" alt="" style="width: 48px; height: 48px; object-fit: cover; border-radius: 4px;" />
+        <% else %>
+          <div style="width: 48px; height: 48px; background: #e1e3e5; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #6d7175;">📦</div>
+        <% end %>
+        <div class="issue-content">
+          <p class="issue-title"><%= product[:title] %></p>
+          <p class="issue-meta">/<%= product[:handle] %></p>
+        </div>
+        <% if product[:already_monitored] %>
+          <span class="badge badge-healthy">Already monitored</span>
+        <% else %>
+          <%= form_with url: product_pages_path(host: @host), method: :post, local: true do |f| %>
+            <%= hidden_field_tag :shopify_product_id, product[:id] %>
+            <%= hidden_field_tag :handle, product[:handle] %>
+            <%= hidden_field_tag :title, product[:title] %>
+            <%= f.submit "Add to Monitoring", class: "button-primary" %>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="empty-state">
+      <div class="empty-state-icon">📦</div>
+      <h3 class="empty-state-title">No products found</h3>
+      <p class="empty-state-description">We couldn't find any products in your store. Add products first, then come back to monitor them.</p>
+    </div>
+  <% end %>
+</div>
