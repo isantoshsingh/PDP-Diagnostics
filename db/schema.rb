@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_01_083507) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_01_210631) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -105,16 +105,39 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_01_083507) do
   create_table "shops", force: :cascade do |t|
     t.string "access_scopes", default: "", null: false
     t.boolean "billing_exempt", default: false, null: false
+    t.string "country_code", limit: 2
+    t.string "country_name"
     t.datetime "created_at", null: false
+    t.string "currency", limit: 3
+    t.string "email"
     t.string "exemption_reason"
     t.datetime "expires_at"
+    t.string "iana_timezone"
+    t.boolean "installed", default: true, null: false
+    t.datetime "installed_at"
+    t.boolean "password_enabled"
+    t.string "plan_display_name"
+    t.string "plan_name"
+    t.boolean "pre_launch_enabled"
+    t.string "primary_locale", limit: 5
     t.string "refresh_token"
     t.datetime "refresh_token_expires_at"
+    t.datetime "shop_created_at"
+    t.jsonb "shop_json", default: {}
+    t.string "shop_owner"
     t.string "shopify_domain", null: false
+    t.bigint "shopify_shop_id"
     t.string "shopify_token", null: false
+    t.string "timezone"
+    t.datetime "uninstalled_at"
     t.datetime "updated_at", null: false
     t.index ["billing_exempt"], name: "index_shops_on_billing_exempt"
+    t.index ["country_code"], name: "index_shops_on_country_code"
+    t.index ["installed"], name: "index_shops_on_installed"
+    t.index ["plan_name"], name: "index_shops_on_plan_name"
+    t.index ["shop_json"], name: "index_shops_on_shop_json", using: :gin
     t.index ["shopify_domain"], name: "index_shops_on_shopify_domain", unique: true
+    t.index ["shopify_shop_id"], name: "index_shops_on_shopify_shop_id", unique: true
   end
 
   create_table "solid_queue_blocked_executions", force: :cascade do |t|

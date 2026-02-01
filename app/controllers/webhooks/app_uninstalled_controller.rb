@@ -17,6 +17,10 @@ class Webhooks::AppUninstalledController < ApplicationController
       return
     end
 
+    # Update shop metadata from webhook
+    shop.update_from_webhook!(params)
+    shop.update!(installed: false, uninstalled_at: Time.current)
+
     # Cancel the current active subscription
     if shop.active_subscription.present?
       shop.active_subscription.cancel!
