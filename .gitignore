@@ -29,7 +29,6 @@
 !/tmp/storage/.keep
 
 /public/assets
-/public/frontend
 
 # Frontend (React)
 /frontend/node_modules

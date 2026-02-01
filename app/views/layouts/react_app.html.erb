@@ -15,10 +15,8 @@
 
     <%= csrf_meta_tags %>
 
-    <!-- App styles loaded from frontend build -->
-    <% if Rails.env.production? %>
-      <link rel="stylesheet" href="/frontend/assets/style.css" />
-    <% end %>
+    <!-- App styles from built frontend -->
+    <link rel="stylesheet" href="/frontend/assets/styles.css" />
   </head>
 
   <body>
@@ -42,20 +40,7 @@
       };
     </script>
 
-    <!-- React app bundle -->
-    <% if Rails.env.development? %>
-      <!-- In development, load from Vite dev server -->
-      <script type="module">
-        import RefreshRuntime from 'http://localhost:3001/@react-refresh'
-        RefreshRuntime.injectIntoGlobalHook(window)
-        window.$RefreshReg$ = () => {}
-        window.$RefreshSig$ = () => (type) => type
-        window.__vite_plugin_react_preamble_installed__ = true
-      </script>
-      <script type="module" src="http://localhost:3001/src/main.jsx"></script>
-    <% else %>
-      <!-- In production, load built assets -->
-      <script type="module" src="/frontend/assets/app.js"></script>
-    <% end %>
+    <!-- React app bundle (built assets) -->
+    <script type="module" src="/frontend/assets/app.js"></script>
   </body>
 </html>
