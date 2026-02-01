@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="shopify-api-key" content="<%= ShopifyApp.configuration.api_key %>" />
+    <% application_name = ShopifyApp.configuration.application_name || "PDP Diagnostics" %>
+    <title><%= application_name %></title>
+
+    <!-- Shopify App Bridge (CDN - always up to date) -->
+    <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
+
+    <!-- Shopify Polaris Web Components -->
+    <script src="https://cdn.shopify.com/shopifycloud/polaris.js"></script>
+
+    <%= csrf_meta_tags %>
+
+    <!-- App styles from built frontend -->
+    <link rel="stylesheet" href="/frontend/assets/styles.css" />
+  </head>
+
+  <body>
+    <div id="root">
+      <!-- React app mounts here -->
+      <s-page>
+        <s-box padding-block-start="800" padding-block-end="800">
+          <s-inline-stack align="center" block-align="center">
+            <s-spinner size="large"></s-spinner>
+          </s-inline-stack>
+        </s-box>
+      </s-page>
+    </div>
+
+    <!-- Pass data to React app -->
+    <script>
+      window.__APP_DATA__ = {
+        apiKey: '<%= ShopifyApp.configuration.api_key %>',
+        host: '<%= @host %>',
+        shopOrigin: '<%= @shop&.shopify_domain || current_shopify_domain rescue "" %>'
+      };
+    </script>
+
+    <!-- React app bundle (built assets) -->
+    <script type="module" src="/frontend/assets/app.js"></script>
+  </body>
+</html>
