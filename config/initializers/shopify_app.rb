@@ -10,7 +10,7 @@ ShopifyApp.configure do |config|
   config.embedded_app = true
   config.new_embedded_auth_strategy = true
 
-  config.after_authenticate_job = { job: "AfterAuthenticateJob" }
+  config.after_authenticate_job = { job: "AfterAuthenticateJob", inline: true }
   config.api_version = "2025-10"
   config.shop_session_repository = "Shop"
   config.log_level = :info

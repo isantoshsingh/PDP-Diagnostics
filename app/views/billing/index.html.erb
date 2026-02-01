@@ -57,7 +57,11 @@
       <div>
         <p class="stat-card-title">Price</p>
         <p style="margin: 4px 0 0 0; font-weight: 500;">
-          $10/month
+          <% if @subscription %>
+            $<%= @subscription.price.to_i %>/<%= @subscription.currency_code == 'USD' ? 'month' : @subscription.currency_code %>
+          <% else %>
+            $10/month
+          <% end %>
         </p>
       </div>
     </div>
@@ -65,15 +69,18 @@
     <% if @subscription&.in_trial? %>
       <div style="background: #F6F6F7; padding: 16px; border-radius: 8px; border-left: 3px solid #008060;">
         <p style="margin: 0; font-size: 14px; color: #202223;">
-          <strong>Trial Period:</strong> You're currently in your 14-day free trial. 
-          You'll be charged $10/month after your trial ends. Cancel anytime through your Shopify admin.
+          <strong>Trial Period:</strong> You're currently in your <%= @subscription.trial_days %>-day free trial. 
+          You'll be charged $<%= @subscription.price.to_i %>/month after your trial ends. Cancel anytime through your Shopify admin.
         </p>
       </div>
     <% elsif @shop.subscription_status == 'active' %>
       <div style="background: #F6F6F7; padding: 16px; border-radius: 8px; border-left: 3px solid #008060;">
         <p style="margin: 0; font-size: 14px; color: #202223;">
-          <strong>Active Subscription:</strong> Your subscription is active. 
-          You're being charged $10/month. Manage your subscription through your Shopify admin.
+          <strong>Active Subscription:</strong> Your subscription is active.
+          <% if @subscription %>
+            You're being charged $<%= @subscription.price.to_i %>/month.
+          <% end %>
+          Manage your subscription through your Shopify admin.
         </p>
       </div>
     <% end %>
