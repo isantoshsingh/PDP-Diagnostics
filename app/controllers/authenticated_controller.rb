@@ -18,11 +18,8 @@ class AuthenticatedController < ApplicationController
   end
 
   # Check if current shop is exempt from billing
-  # Must load shop directly because @shop may not be set yet when check_billing runs
+  # Reuses @shop set by set_shop (which runs before billing checks)
   def billing_exempt?
-    return false unless current_shopify_session
-
-    shop = Shop.find_by(shopify_domain: current_shopify_session.shop)
-    shop&.billing_exempt? || false
+    @shop&.billing_exempt? || false
   end
 end

@@ -65,7 +65,7 @@
     <% end %>
   </div>
   
-  <% if @open_issues.any? %>
+  <% if @open_issues_count > 0 %>
     <% @open_issues.each do |issue| %>
       <%= link_to issue_path(issue, host: @host), class: "issue-item" do %>
         <div class="issue-severity <%= issue.severity %>"></div>

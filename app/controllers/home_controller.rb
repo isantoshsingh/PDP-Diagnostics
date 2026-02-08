@@ -14,38 +14,41 @@ class HomeController < AuthenticatedController
   include ShopifyApp::EnsureBilling
 
   def index
-    @shop = Shop.find_by(shopify_domain: current_shopify_domain)
-    
+    # @shop is already set by AuthenticatedController#set_shop
     if @shop.nil?
       Rails.logger.error("[HomeController] Shop not found for domain: #{current_shopify_domain}")
       redirect_to ShopifyApp.configuration.login_url
       return
     end
 
-    # Dashboard metrics
-    @product_pages = @shop.product_pages.monitoring_enabled.order(last_scanned_at: :desc)
-    @total_pages = @product_pages.count
-    @healthy_pages = @product_pages.healthy.count
-    @warning_pages = @product_pages.warning.count
-    @critical_pages = @product_pages.critical.count
+    # Preload shop_setting to avoid a separate query in the view
+    ActiveRecord::Associations::Preloader.new(records: [@shop], associations: :shop_setting).call
 
-    # Open issues
-    @open_issues = Issue.joins(:product_page)
-                        .where(product_pages: { shop_id: @shop.id })
-                        .where(status: "open")
-                        .order(severity: :asc, last_detected_at: :desc)
-                        .limit(10)
+    # Dashboard metrics — single GROUP BY query instead of 4 separate COUNTs
+    status_counts = @shop.product_pages.monitoring_enabled.group(:status).count
+    @total_pages = status_counts.values.sum
+    @healthy_pages = status_counts["healthy"] || 0
+    @warning_pages = status_counts["warning"] || 0
+    @critical_pages = status_counts["critical"] || 0
 
-    @open_issues_count = Issue.joins(:product_page)
-                              .where(product_pages: { shop_id: @shop.id })
-                              .where(status: "open")
-                              .count
+    # Open issues — eager load product_page to avoid N+1, .load to avoid extra EXISTS query in view
+    open_issues_scope = Issue.joins(:product_page)
+                             .where(product_pages: { shop_id: @shop.id })
+                             .where(status: "open")
+    @open_issues_count = open_issues_scope.count
+    @open_issues = open_issues_scope
+                     .includes(:product_page)
+                     .order(severity: :asc, last_detected_at: :desc)
+                     .limit(10)
+                     .load
 
-    # Recent scans
+    # Recent scans — eager load product_page to avoid N+1, .load to avoid extra EXISTS query in view
     @recent_scans = Scan.joins(:product_page)
                         .where(product_pages: { shop_id: @shop.id })
+                        .includes(:product_page)
                         .order(created_at: :desc)
                         .limit(5)
+                        .load
 
     # 7-day scan history for trend chart
     @scan_history = Scan.joins(:product_page)
