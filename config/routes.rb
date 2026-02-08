@@ -36,7 +36,7 @@ Rails.application.routes.draw do
   resource :settings, only: [:show, :update]
 
   # Billing & Pricing
-  get "/billing", to: "billing#index", as: :billing
+  get "/pricing", to: "billing#index", as: :pricing
 
 
 
