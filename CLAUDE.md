@@ -171,10 +171,34 @@ Handled at `/webhooks/*`:
 ### Frontend
 
 - Shopify Polaris Web Components (not React Polaris)
+- Shopify App Bridge Web Components for admin integration (navigation, modals, title bars, save bars)
 - ERB templates in `app/views/`
 - Turbo for SPA-like navigation
 - Stimulus for JavaScript behavior
 - Importmap for JS module loading (no bundler)
+
+### App Bridge Web Components & APIs
+
+App Bridge renders UI elements outside the app iframe, in the Shopify admin itself. Loaded via CDN (`app-bridge.js`), no npm package needed.
+
+**Web Components:**
+- `s-app-nav` — App navigation sidebar (with `s-link` children)
+- `s-page` — Page title bar + layout (with `primary-action`, `secondary-actions`, `breadcrumb-actions`, `accessory`, `aside` slots)
+- `ui-title-bar` — Title bar inside modals (with `<button>` children; supports `variant="primary"`, `variant="breadcrumb"`, `tone="critical"`)
+- `ui-modal` / `s-modal` — Overlay modal (`show()`, `hide()`, `src` for URL-based, `variant` for sizing)
+- `s-app-window` — Fullscreen modal window (`src` required, replaces deprecated Fullscreen API)
+- `ui-save-bar` — Contextual save bar (or use `data-save-bar` attribute on `<form>` for automatic integration)
+
+**JavaScript APIs (`shopify` global):**
+- `shopify.toast.show(msg, opts)` — Toast notifications (`{ duration, isError, action }`)
+- `shopify.resourcePicker(opts)` — Product/collection/variant picker (`{ type, multiple, filter }`)
+- `shopify.idToken()` — Session token (JWT) for backend auth
+- `shopify.modal.show(id)` / `shopify.modal.hide(id)` — Programmatic modal control
+- `shopify.saveBar.show(id)` / `shopify.saveBar.hide(id)` — Programmatic save bar control
+- `shopify.navigate(url)` — In-app navigation (supports `shopify:admin/*` URLs)
+- `fetch('shopify:admin/api/graphql.json', opts)` — Direct Admin API access (requires TOML config)
+
+> **Full reference:** See `.agent/skills/shopify-app-bridge/SKILL.md` for detailed usage, attributes, examples, and common patterns.
 
 ## Important Constraints
 
@@ -200,3 +224,5 @@ Key variables (see `.env` or credentials):
 - `ROADMAP.md` — Phased product roadmap
 - `SECURITY.md` — Security policy and practices
 - `agent.md` — AI agent behavioral instructions and product identity
+- `.agent/skills/shopify-polaris-design/SKILL.md` — Polaris Web Components design guide
+- `.agent/skills/shopify-app-bridge/SKILL.md` — App Bridge Web Components & JavaScript APIs guide
