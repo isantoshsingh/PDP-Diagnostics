@@ -1,85 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <% application_name = ShopifyApp.configuration.application_name || "Silent Profit" %>
-    <title><%= application_name %></title>
 
-    <meta name="shopify-api-key" content="<%= ShopifyApp.configuration.api_key %>" />
-    
-    <!-- Shopify Polaris Web Components -->
-    <script src="https://cdn.shopify.com/shopifycloud/polaris.js"></script>
-    <!-- Shopify App Bridge -->
-    <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
-    
-    <%= stylesheet_link_tag "application" %>
-    <%= javascript_importmap_tags %>
-    <%= csrf_meta_tags %>
-  </head>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Silent Profit is a Shopify app that helps you monitor your product pages for silent failures." />
+  <% application_name = ShopifyApp.configuration.application_name || "Silent Profit" %>
+  <title><%= application_name %></title>
 
-  <body>
-    <!-- Shopify App Navigation Menu -->
-    <s-app-nav>
-      <s-link href="<%= root_path(host: @host) %>" rel="home">Dashboard</s-link>
-      <s-link href="<%= product_pages_path(host: @host) %>">Monitored Pages</s-link>
-      <s-link href="<%= issues_path(host: @host) %>">Issues</s-link>
-      <s-link href="<%= scans_path(host: @host) %>">Scan History</s-link>
-      <s-link href="<%= pricing_path(host: @host) %>">Pricing</s-link>
-      <s-link href="<%= settings_path(host: @host) %>">Settings</s-link>
-    </s-app-nav>
+  <meta name="shopify-api-key" content="<%= ShopifyApp.configuration.api_key %>" />
 
-    <div class="app-wrapper">
-      <% if flash[:success] %>
-        <div class="flash-message flash-success">
-          ✓ <%= flash[:success] %>
-        </div>
-      <% end %>
-      <% if flash[:error] %>
-        <div class="flash-message flash-error">
-          ✕ <%= flash[:error] %>
-        </div>
-      <% end %>
-      <% if flash[:notice] %>
-        <div class="flash-message flash-notice">
-          <%= flash[:notice] %>
-        </div>
-      <% end %>
-      
-      <main role="main">
-        <%= yield %>
-      </main>
+  <!-- Shopify Polaris Web Components -->
+  <script src="https://cdn.shopify.com/shopifycloud/polaris.js"></script>
+  <!-- Shopify App Bridge -->
+  <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
+
+  <%= stylesheet_link_tag "application" %>
+  <%= javascript_importmap_tags %>
+  <%= csrf_meta_tags %>
+</head>
+
+<body>
+  <!-- Shopify App Navigation Menu -->
+  <s-app-nav>
+    <s-link href="<%= root_path(host: @host) %>" rel="home">Dashboard</s-link>
+    <s-link href="<%= product_pages_path(host: @host) %>">Monitored Pages</s-link>
+    <s-link href="<%= issues_path(host: @host) %>">Issues</s-link>
+    <s-link href="<%= scans_path(host: @host) %>">Scan history</s-link>
+    <s-link href="<%= pricing_path(host: @host) %>">Pricing</s-link>
+    <s-link href="<%= settings_path(host: @host) %>">Settings</s-link>
+  </s-app-nav>
+
+  <div class="app-wrapper">
+    <% if flash[:success] %>
+    <div class="flash-message flash-success">
+      ✓ <%= flash[:success] %>
     </div>
-    
-    <%= content_tag(:div, nil, id: 'shopify-app-init', data: {
+    <% end %>
+    <% if flash[:error] %>
+    <div class="flash-message flash-error">
+      ✕ <%= flash[:error] %>
+    </div>
+    <% end %>
+    <% if flash[:notice] %>
+    <div class="flash-message flash-notice">
+      <%= flash[:notice] %>
+    </div>
+    <% end %>
+
+    <main role="main">
+      <%= yield %>
+    </main>
+  </div>
+
+  <%= content_tag(:div, nil, id: 'shopify-app-init', data: {
       api_key: ShopifyApp.configuration.api_key,
       shop_origin: @shop_origin || (@current_shopify_session.shop if @current_shopify_session),
       host: @host,
     }) %>
 
-    <script>
-      // Initialize App Bridge
-      document.addEventListener('DOMContentLoaded', function() {
-        const initData = document.getElementById('shopify-app-init');
-        if (initData) {
-          const config = {
-            apiKey: initData.dataset.apiKey,
-            host: initData.dataset.host,
-            forceRedirect: true
-          };
-          
-          if (window.shopify) {
-            // App Bridge is loaded
-            console.log('Silent Profit: App Bridge initialized');
-          }
-        }
-      });
-    </script>
+  <script>
+    // Initialize App Bridge
+    document.addEventListener('DOMContentLoaded', function() {
+      const initData = document.getElementById('shopify-app-init');
+      if (initData) {
+        const config = {
+          apiKey: initData.dataset.apiKey,
+          host: initData.dataset.host,
+          forceRedirect: true
+        };
 
-    <% if content_for?(:javascript) %>
-      <div id="ContentForJavascript">
-        <%= yield :javascript %>
-      </div>
-    <% end %>
-  </body>
+        if (window.shopify) {
+          // App Bridge is loaded
+          console.log('Silent Profit: App Bridge initialized');
+        }
+      }
+    });
+  </script>
+
+  <% if content_for?(:javascript) %>
+  <div id="ContentForJavascript">
+    <%= yield :javascript %>
+  </div>
+  <% end %>
+</body>
+
 </html>

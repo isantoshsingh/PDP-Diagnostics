@@ -1,6 +1,6 @@
 <%# Scans Index — Polaris Web Components (Built for Shopify) %>
 
-<s-page heading="Scan History">
+<s-page heading="Scan history">
   <s-link slot="breadcrumb-actions" href="<%= root_path(host: @host) %>">Dashboard</s-link>
   <% if @scans.count > 0 %>
   <s-badge slot="accessory" tone="info"><%= @scans.count %> scans</s-badge>
