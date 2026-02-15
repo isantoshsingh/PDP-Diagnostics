@@ -16,7 +16,5 @@ class ShopRedactJob < ActiveJob::Base
       raise ActiveRecord::RecordNotFound, "Shop Not Found"
     end
 
-    shop.with_shopify_session do
-    end
   end
 end
