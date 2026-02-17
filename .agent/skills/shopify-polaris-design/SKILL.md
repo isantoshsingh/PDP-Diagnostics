@@ -161,7 +161,7 @@ To emphasize a key metric (e.g. load time) inside body text: wrap only that valu
     <s-box maxInlineSize="200px" maxBlockSize="200px">
       <s-image
         aspectRatio="1/0.5"
-        src="https://cdn.shopify.com/static/images/polaris/patterns/callout.png"
+        src="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
         alt="Description"
       />
     </s-box>

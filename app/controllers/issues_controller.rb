@@ -25,7 +25,7 @@ class IssuesController < AuthenticatedController
     @issues = @issues.where(severity: params[:severity]) if params[:severity].present?
 
     @issues = @issues.page(params[:page]).per(20) if @issues.respond_to?(:page)
-    
+
     @host = params[:host]
   end
 

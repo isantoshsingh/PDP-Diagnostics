@@ -2,7 +2,7 @@
 
 <s-page heading="Monitored pages">
   <% if @can_add_more %>
-  <s-button slot="primary-action" variant="primary" id="open-product-picker">Add product</s-button>
+  <s-button slot="primary-action" variant="primary" id="open-product-picker">Add products</s-button>
   <% end %>
   <s-link slot="breadcrumb-actions" href="<%= root_path(host: @host) %>">Dashboard</s-link>
   <s-badge slot="accessory" tone="info"><%= @product_pages_count %>/<%= @shop_setting&.max_monitored_pages || 5 %></s-badge>
@@ -10,7 +10,7 @@
 
 <% if @product_pages_count > 0 %>
 <%# Product list - Thumbnail | Title | Status | Actions %>
-<s-section padding="none">
+<s-section>
   <s-stack gap="none">
     <% @product_pages.each do |page| %>
     <s-box border="base" padding="base">
@@ -50,8 +50,8 @@
 </s-section>
 
 <%# Remaining slots info %>
+<% if @can_add_more %>
 <s-box paddingBlockStart="small">
-  <% if @can_add_more %>
   <s-section padding="base">
     <s-stack direction="inline" gap="base" align="center">
       <s-icon type="info" tone="info"></s-icon>
@@ -61,29 +61,29 @@
       </s-paragraph>
     </s-stack>
   </s-section>
-  <% end %>
-  <% else %>
-  <%# Empty state - Shopify pattern %>
-  <s-section accessibilityLabel="No monitored products">
-    <s-grid gap="base" justifyItems="center" paddingBlock="large-400">
-      <s-box maxInlineSize="200px" maxBlockSize="200px">
-        <s-image aspectRatio="1/0.5" src="https://cdn.shopify.com/static/images/polaris/patterns/callout.png" alt="Add products to monitor" />
-      </s-box>
-      <s-grid justifyItems="center" maxInlineSize="450px" gap="base">
-        <s-stack align="center">
-          <s-heading>No product pages monitored yet</s-heading>
-          <s-paragraph>
-            Add up to <%= @shop_setting&.max_monitored_pages || 5 %> product pages to start monitoring for JavaScript errors, broken UI elements, and performance issues.
-          </s-paragraph>
-        </s-stack>
-        <s-button id="open-product-picker-empty" variant="primary">
-          Add product pages
-        </s-button>
-      </s-grid>
-    </s-grid>
-  </s-section>
-  <% end %>
 </s-box>
+<% end %>
+
+<% else %>
+<%# Empty state - Shopify pattern %>
+<s-section padding="base">
+  <s-grid gap="base" justifyItems="center" paddingBlock="large-400">
+    <s-box maxInlineSize="200px" maxBlockSize="200px">
+      <s-image aspectRatio="1/0.5" src="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png" alt="Add products to monitor" />
+    </s-box>
+    <s-grid justifyItems="center" maxInlineSize="450px" gap="base">
+      <s-heading>No product pages monitored yet</s-heading>
+      <s-paragraph>
+        Add up to <%= @shop_setting&.max_monitored_pages || 5 %> product pages to start monitoring for JavaScript errors, broken UI elements, and performance issues.
+      </s-paragraph>
+      <s-button id="open-product-picker-empty" variant="primary">
+        Add products
+      </s-button>
+    </s-grid>
+  </s-grid>
+</s-section>
+<% end %>
+
 
 <!-- Store data for JavaScript (Resource Picker) -->
 <div id="picker-config" data-create-url="<%= product_pages_path %>" data-redirect-url="<%= product_pages_path(host: @host) %>" data-monitored-gids="<%= @monitored_product_gids.to_json %>" data-max-selections="<%= @remaining_slots %>" data-csrf-token="<%= form_authenticity_token %>" style="display: none;">

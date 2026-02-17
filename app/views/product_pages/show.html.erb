@@ -1,7 +1,7 @@
 <%# Product Page Detail — Polaris Web Components (Built for Shopify) %>
 
 <s-page heading="<%= @product_page.title %>">
-  <s-button slot="primary-action" onclick="document.getElementById('rescan-form').submit()">Rescan Now</s-button>
+  <s-button slot="primary-action" onclick="document.getElementById('rescan-form').submit()">Rescan now</s-button>
   <s-link slot="breadcrumb-actions" href="<%= product_pages_path(host: @host) %>">Monitored Pages</s-link>
   <s-badge slot="accessory" tone="<%= @product_page.status == 'healthy' ? 'success' : (@product_page.status == 'critical' ? 'critical' : 'warning') %>"><%= @product_page.status.capitalize %></s-badge>
 </s-page>
@@ -57,10 +57,11 @@
             <strong><%= issue.title %></strong>
             <s-stack direction="inline" gap="tight" align="center">
               <s-badge tone="<%= issue.severity == 'high' ? 'critical' : (issue.severity == 'medium' ? 'warning' : 'attention') %>"><%= issue.severity_label %></s-badge>
-              <s-paragraph>First detected <%= time_ago_in_words(issue.first_detected_at) %> ago</s-paragraph>
-              <% if issue.occurrence_count > 1 %>
-              <s-paragraph>• Seen <%= issue.occurrence_count %> times</s-paragraph>
-              <% end %>
+              <s-paragraph>
+                <% parts = ["First detected #{time_ago_in_words(issue.first_detected_at)} ago"] %>
+                <% parts << "Seen #{issue.occurrence_count} times" if issue.occurrence_count > 1 %>
+                <%= parts.join(' · ') %>
+              </s-paragraph>
             </s-stack>
           </s-stack>
           <s-paragraph>View Details →</s-paragraph>
@@ -98,16 +99,15 @@
             <strong>Scan #<%= scan.id %></strong>
             <s-stack direction="inline" gap="tight" align="center">
               <s-badge tone="<%= scan.status == 'completed' ? 'success' : (scan.status == 'failed' ? 'critical' : 'info') %>"><%= scan.status.capitalize %></s-badge>
-              <s-paragraph><%= time_ago_in_words(scan.created_at) %> ago</s-paragraph>
-              <% if scan.page_load_time_ms %>
-              <s-paragraph>• <%= (scan.page_load_time_ms / 1000.0).round(1) %>s load time</s-paragraph>
-              <% end %>
-              <% if scan.issues.any? %>
-              <s-paragraph>• <%= scan.issues.count %> issue<%= scan.issues.count > 1 ? 's' : '' %> detected</s-paragraph>
-              <% end %>
+              <s-paragraph>
+                <% parts = ["#{time_ago_in_words(scan.created_at)} ago"] %>
+                <% parts << "#{(scan.page_load_time_ms / 1000.0).round(1)}s load time" if scan.page_load_time_ms %>
+                <% parts << "#{scan.issues.count} issue#{scan.issues.count > 1 ? 's' : ''} detected" if scan.issues.any? %>
+                <%= parts.join(' · ') %>
+              </s-paragraph>
             </s-stack>
           </s-stack>
-          <s-paragraph><%= scan.status.capitalize %></s-paragraph>
+          <s-badge tone="<%= scan.status == 'completed' ? 'success' : (scan.status == 'failed' ? 'critical' : 'info') %>"><%= scan.status.capitalize %></s-badge>
         </s-grid>
       </s-box>
       <% end %>

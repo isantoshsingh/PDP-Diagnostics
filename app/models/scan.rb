@@ -103,6 +103,14 @@ class Scan < ApplicationRecord
   # Returns parsed detection results from the detection engine
   def parsed_dom_checks_data
     return [] if dom_checks_data.blank?
-    dom_checks_data.is_a?(Array) ? dom_checks_data : []
+
+    # Handle both Array (properly deserialized) and String (JSON string) formats
+    if dom_checks_data.is_a?(Array)
+      dom_checks_data
+    elsif dom_checks_data.is_a?(String)
+      JSON.parse(dom_checks_data) rescue []
+    else
+      []
+    end
   end
 end

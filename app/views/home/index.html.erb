@@ -90,7 +90,7 @@
 <%# Active Dashboard %>
 <s-page heading="PDP Diagnostics" inlineSize="base">
   <s-button slot="primary-action" variant="primary" href="<%= product_pages_path(host: @host) %>">
-    Add Products
+    Add products
   </s-button>
 
   <%# Sidebar %>
@@ -98,19 +98,19 @@
     <s-section heading="Quick actions">
       <s-stack direction="block" gap="small-300">
         <s-button href="<%= product_pages_path(host: @host) %>" fullWidth>
-          Add Products
+          Add products
         </s-button>
         <s-button href="<%= product_pages_path(host: @host) %>" fullWidth>
-          View All Pages
+          View all pages
         </s-button>
         <s-button href="<%= scans_path(host: @host) %>" fullWidth>
-          Scan History
+          Scan history
         </s-button>
       </s-stack>
     </s-section>
 
     <s-section heading="Need help?">
-      <s-stack direction="block" gap="tight">
+      <s-stack direction="block" gap="small-300">
         <s-paragraph>
           Configure alerts, scan frequency, and notification settings.
         </s-paragraph>

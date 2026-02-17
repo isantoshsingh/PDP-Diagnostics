@@ -28,12 +28,12 @@
           <s-stack direction="block" gap="extra-tight">
             <strong><%= issue.title %></strong>
             <s-stack direction="inline" gap="tight" align="center">
-              <s-paragraph><%= issue.product_page.title %></s-paragraph>
               <s-badge tone="<%= issue.severity == 'high' ? 'critical' : (issue.severity == 'medium' ? 'warning' : 'attention') %>"><%= issue.severity_label %></s-badge>
-              <s-paragraph><%= issue.status.capitalize %></s-paragraph>
-              <% if issue.occurrence_count > 1 %>
-              <s-paragraph>Seen <%= issue.occurrence_count %> times</s-paragraph>
-              <% end %>
+              <s-paragraph>
+                <% parts = [issue.product_page.title, issue.status.capitalize] %>
+                <% parts << "Seen #{issue.occurrence_count} times" if issue.occurrence_count > 1 %>
+                <%= parts.join(' · ') %>
+              </s-paragraph>
             </s-stack>
           </s-stack>
           <s-badge tone="<%= issue.status == 'resolved' ? 'success' : (issue.status == 'acknowledged' ? 'warning' : 'critical') %>"><%= issue.status.capitalize %></s-badge>
@@ -48,16 +48,14 @@
         <s-icon type="check-circle-filled" tone="success"></s-icon>
       </s-box>
       <s-grid justifyItems="center" maxInlineSize="450px" gap="base">
-        <s-stack align="center" gap="tight">
-          <s-heading>No issues found</s-heading>
-          <s-paragraph>
-            <% if params[:status].present? %>
-            No <%= params[:status] %> issues at this time.
-            <% else %>
+        <s-heading>No issues found</s-heading>
+        <s-paragraph>
+          <% if params[:status].present? %>
+          No <%= params[:status] %> issues at this time.
+          <% else %>
             All your product pages are healthy.
-            <% end %>
-          </s-paragraph>
-        </s-stack>
+          <% end %>
+        </s-paragraph>
       </s-grid>
     </s-grid>
     <% end %>
