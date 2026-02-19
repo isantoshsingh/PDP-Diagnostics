@@ -11,10 +11,10 @@
   <s-section heading="Alert preferences">
     <s-stack direction="block" gap="base">
       <input type="hidden" name="shop_setting[email_alerts_enabled]" value="0" />
-      <s-checkbox label="Email alerts" name="shop_setting[email_alerts_enabled]" value="1" checked="<%= @settings.email_alerts_enabled %>" details="Receive email notifications when high-severity issues are detected"></s-checkbox>
+      <s-checkbox label="Email alerts" name="shop_setting[email_alerts_enabled]" value="1" <%= 'checked' if @settings.email_alerts_enabled? %> details="Receive email notifications when high-severity issues are detected"></s-checkbox>
 
       <input type="hidden" name="shop_setting[admin_alerts_enabled]" value="0" />
-      <s-checkbox label="Shopify admin notifications" name="shop_setting[admin_alerts_enabled]" value="1" checked="<%= @settings.admin_alerts_enabled %>" details="Receive notifications in your Shopify admin dashboard"></s-checkbox>
+      <s-checkbox label="Shopify admin notifications" name="shop_setting[admin_alerts_enabled]" value="1" <%= 'checked' if @settings.admin_alerts_enabled? %> details="Receive notifications in your Shopify admin dashboard"></s-checkbox>
 
       <s-email-field label="Alert email address" id="alert_email" name="shop_setting[alert_email]" value="<%= @settings.alert_email %>" placeholder="<%= @shop.email || @shop.shopify_domain %>" details="<%= @shop.email.present? ? "Leave blank to use your shop's email (#{@shop.email})" : "Leave blank to use your store's default email" %>"></s-email-field>
     </s-stack>
@@ -22,10 +22,62 @@
 
   <s-box paddingBlockStart="base">
     <s-section heading="Scan settings">
-      <s-select label="Scan frequency" id="scan_frequency" name="shop_setting[scan_frequency]" details="How often to automatically scan your monitored pages" value="<%= @settings.scan_frequency %>">
-        <s-option value="daily">Daily (recommended)</s-option>
-        <s-option value="weekly">Weekly</s-option>
+      <s-select label="Scan frequency" id="scan_frequency" name="shop_setting[scan_frequency]" details="How often to automatically scan your monitored pages">
+        <s-option value="daily" <%= 'selected' if @settings.scan_frequency == 'daily' %>>Daily (recommended)</s-option>
+        <s-option value="weekly" <%= 'selected' if @settings.scan_frequency == 'weekly' %>>Weekly</s-option>
       </s-select>
     </s-section>
   </s-box>
 </form>
+
+<% content_for :javascript do %>
+<script>
+  document.getElementById('settings-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const url = form.action;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ||
+                      form.querySelector('[name="authenticity_token"]')?.value || '';
+
+    // Collect form data (includes hidden fields for unchecked checkboxes)
+    const params = new URLSearchParams(new FormData(form));
+
+    const headers = {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-CSRF-Token': csrfToken,
+      'Accept': 'text/html'
+    };
+
+    try {
+      const token = await shopify.idToken();
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+    } catch (e) {
+      console.warn('Could not get App Bridge session token:', e);
+    }
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: params.toString(),
+        credentials: 'same-origin',
+        redirect: 'manual'
+      });
+
+      // Controller redirects back to /settings on success (302) — treat as success
+      if (response.ok || response.type === 'opaqueredirect' || (response.status >= 300 && response.status < 400)) {
+        shopify.toast.show('Settings saved successfully.', { duration: 3000 });
+      } else {
+        throw new Error(`Server returned ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Settings save failed:', error);
+      shopify.toast.show('Failed to save settings. Please try again.', {
+        duration: 3000,
+        isError: true
+      });
+    }
+  });
+</script>
+<% end %>
