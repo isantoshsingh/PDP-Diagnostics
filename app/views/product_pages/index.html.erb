@@ -32,7 +32,7 @@
         <%# Action buttons %>
         <s-stack direction="inline" gap="tight">
           <s-button href="<%= product_page_path(page, host: @host) %>">View</s-button>
-          <s-button onclick="rescanProduct('<%= rescan_product_page_path(page, host: @host) %>')">Rescan</s-button>
+          <s-button onclick="rescanProduct(this, '<%= rescan_product_page_path(page, host: @host) %>', '<%= product_page_path(page, host: @host) %>')">Rescan</s-button>
           <s-button tone="critical" onclick="deleteProduct('<%= product_page_path(page, host: @host) %>', '<%= page.title %>')">Remove</s-button>
         </s-stack>
       </s-grid>
@@ -126,7 +126,9 @@
     }
   }
 
-  async function rescanProduct(url) {
+  async function rescanProduct(btn, url, redirectUrl) {
+    btn.loading = true;
+
     try {
       const headers = {
         'X-CSRF-Token': csrfToken,
@@ -140,7 +142,7 @@
         console.warn('Could not get session token for rescan:', e);
       }
 
-      shopify.toast.show('Rescan started...', { duration: 2000 });
+      shopify.toast.show('Rescan queued! This may take a minute.', { duration: 3000 });
 
       const response = await fetch(url, {
         method: 'POST',
@@ -150,13 +152,13 @@
       });
 
       if (response.ok || response.type === 'opaqueredirect' || (response.status >= 300 && response.status < 400)) {
-        shopify.toast.show('Rescan completed!', { duration: 3000 });
-        setTimeout(() => window.location.reload(), 500);
+        setTimeout(() => window.location.href = redirectUrl, 500);
       } else {
         throw new Error(`Server returned ${response.status}`);
       }
     } catch (error) {
       console.error('Rescan failed:', error);
+      btn.loading = false;
       shopify.toast.show('Failed to rescan. Please try again.', {
         duration: 3000,
         isError: true

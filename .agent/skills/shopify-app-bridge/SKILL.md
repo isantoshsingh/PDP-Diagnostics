@@ -539,17 +539,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
 ### Pattern: Rescan with Loading Feedback
 
+Use `btn.loading = true` on the `<s-button>` element. This replaces the button content with a built-in spinner and disables it automatically. Pass `this` from the `onclick` attribute to get the button reference.
+
+```html
+<s-button onclick="rescanProduct(this, '/product_pages/1/rescan', '/product_pages/1')">
+  Rescan
+</s-button>
+```
+
 ```javascript
-async function rescanPage(pageId) {
-  const button = document.getElementById(`rescan-btn-${pageId}`);
-  button.disabled = true;
+async function rescanProduct(btn, rescanUrl, redirectUrl) {
+  btn.loading = true; // shows built-in spinner, disables button
 
-  shopify.toast.show('Scan queued...', { duration: 2000 });
+  try {
+    shopify.toast.show('Rescan queued! This may take a minute.', { duration: 3000 });
 
-  const form = document.getElementById(`rescan-form-${pageId}`);
-  form.submit();
+    const response = await fetch(rescanUrl, {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': csrfToken },
+      credentials: 'same-origin',
+      redirect: 'manual'
+    });
+
+    if (response.ok || response.type === 'opaqueredirect' || (response.status >= 300 && response.status < 400)) {
+      setTimeout(() => window.location.href = redirectUrl, 500);
+    } else {
+      throw new Error(`Server returned ${response.status}`);
+    }
+  } catch (error) {
+    btn.loading = false; // restore button on failure so user can retry
+    shopify.toast.show('Failed to rescan. Please try again.', { duration: 3000, isError: true });
+  }
 }
 ```
+
+---
+
+### 2.6 `s-spinner` — Loading Spinner
+
+Displays an animated loading indicator. Per Shopify docs, for **button loading states**, prefer the `loading` property on `s-button` instead of a standalone spinner. Use `s-spinner` for section/page-level loading states.
+
+**Properties:**
+| Property | Description |
+|---|---|
+| `accessibilityLabel` | Announced to screen readers. Recommended when there is no visible loading text |
+| `size` | `"small"`, `"base"` (default), `"large"`, `"large-100"` |
+
+```html
+<!-- Basic -->
+<s-spinner accessibilityLabel="Loading"></s-spinner>
+
+<!-- Large, centered in a section -->
+<s-stack alignItems="center" gap="base" padding="large">
+  <s-spinner accessibilityLabel="Loading products" size="large"></s-spinner>
+  <s-text>Loading products...</s-text>
+</s-stack>
+
+<!-- Inline with text -->
+<s-stack direction="inline" alignItems="center" gap="small">
+  <s-spinner accessibilityLabel="Saving"></s-spinner>
+  <s-text>Saving...</s-text>
+</s-stack>
+```
+
+> **Prefer `s-button loading` for button actions.** Set `btn.loading = true` via JS (pass `this` from onclick) — it shows a built-in spinner and disables the button automatically.
 
 ---
 
