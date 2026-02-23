@@ -15,6 +15,8 @@
 class ScanPdpJob < ApplicationJob
   queue_as :scans
 
+  RESCAN_DELAY = 30.minutes
+
   # Retry configuration
   retry_on StandardError, wait: :polynomially_longer, attempts: 3
   discard_on ActiveRecord::RecordNotFound
@@ -59,6 +61,13 @@ class ScanPdpJob < ApplicationJob
             Rails.logger.error("[ScanPdpJob] AlertService failed for issue #{issue.id}: #{e.message}")
           end
         end
+      end
+
+      # Schedule a quick rescan to confirm new high-severity issues
+      new_critical_issues = issues.select { |i| i.high_severity? && i.occurrence_count == 1 }
+      if new_critical_issues.any?
+        Rails.logger.info("[ScanPdpJob] Found #{new_critical_issues.length} new high severity issue(s). Scheduling rescan in #{RESCAN_DELAY.inspect}.")
+        ScanPdpJob.set(wait: RESCAN_DELAY).perform_later(product_page_id)
       end
     else
       Rails.logger.warn("[ScanPdpJob] Scan failed for page #{product_page.id}: #{result[:error]}")

@@ -3,6 +3,7 @@
 require "test_helper"
 
 class ScanPdpJobTest < ActiveSupport::TestCase
+  include ActiveJob::TestHelper
   self.use_transactional_tests = true
 
   def setup
@@ -292,6 +293,52 @@ class ScanPdpJobTest < ActiveSupport::TestCase
     atc_issue.reload
     assert_equal 2, atc_issue.occurrence_count
     assert atc_issue.should_alert?, "Should alert after 2 occurrences"
+  end
+
+  # --- Rescan threshold ---
+
+  test "schedules a delayed rescan when a new high severity issue is found" do
+    scan = @product_page.scans.create!(status: "completed")
+    scan_result = {
+      success: true,
+      scan: scan,
+      detection_results: [],
+      error: nil
+    }
+
+    orig_scanner_new = ProductPageScanner.method(:new)
+    orig_detector_new = DetectionService.method(:new)
+    orig_adapter = ActiveJob::Base.queue_adapter
+
+    begin
+      ActiveJob::Base.queue_adapter = :test
+
+      ProductPageScanner.define_singleton_method(:new) do |*args|
+        scanner = Object.new
+        scanner.define_singleton_method(:perform) { scan_result }
+        scanner
+      end
+
+      DetectionService.define_singleton_method(:new) do |*args|
+        detector = Object.new
+        mock_issue = Issue.new(
+          issue_type: "missing_add_to_cart",
+          severity: "high",
+          status: "open",
+          occurrence_count: 1
+        )
+        detector.define_singleton_method(:perform) { [mock_issue] }
+        detector
+      end
+
+      assert_enqueued_with(job: ScanPdpJob, args: [@product_page.id]) do
+        ScanPdpJob.perform_now(@product_page.id)
+      end
+    ensure
+      ActiveJob::Base.queue_adapter = orig_adapter
+      ProductPageScanner.define_singleton_method(:new, &orig_scanner_new)
+      DetectionService.define_singleton_method(:new, &orig_detector_new)
+    end
   end
 
   # --- Detection does nothing for non-completed scans ---
