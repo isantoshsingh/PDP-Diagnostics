@@ -122,13 +122,14 @@
   <s-section heading="Issues requiring attention">
     <s-stack direction="block" gap="none">
       <% @open_issues.first(5).each do |issue| %>
+      <%= link_to issue_path(issue, host: @host), style: "display: block; text-decoration: none; color: inherit;" do %>
       <s-box border="base" padding="base">
         <s-grid gridTemplateColumns="1fr auto" gap="base" alignItems="center">
           <s-stack direction="block" gap="extra-tight">
             <s-stack direction="inline" gap="tight" align="center">
               <s-icon type="<%= issue.severity == 'high' ? 'alert-circle' : 'alert-triangle' %>" tone="<%= issue.severity == 'high' ? 'critical' : 'caution' %>">
               </s-icon>
-              <s-link href="<%= issue_path(issue, host: @host) %>" tone="neutral"><strong><%= issue.title %></strong></s-link>
+              <strong><%= issue.title %></strong>
             </s-stack>
             <s-paragraph>
               <%= issue.product_page.title %> •
@@ -143,6 +144,7 @@
           </s-badge>
         </s-grid>
       </s-box>
+      <% end %>
       <% end %>
     </s-stack>
 
@@ -161,10 +163,11 @@
   <s-section heading="Recent scan activity">
     <s-stack direction="block" gap="none">
       <% @recent_scans.each do |scan| %>
+      <%= link_to scan_path(scan, host: @host), style: "display: block; text-decoration: none; color: inherit;" do %>
       <s-box border="base" padding="base">
         <s-grid gridTemplateColumns="1fr auto" gap="base" alignItems="center">
           <s-stack direction="block" gap="extra-tight">
-            <s-link href="<%= scan_path(scan, host: @host) %>"><strong><%= scan.product_page.title %></strong></s-link>
+            <strong><%= scan.product_page.title %></strong>
             <s-paragraph>
               <%= time_ago_in_words(scan.created_at) %> ago
               <% if scan.page_load_time_ms %>
@@ -177,6 +180,7 @@
           </s-badge>
         </s-grid>
       </s-box>
+      <% end %>
       <% end %>
     </s-stack>
   </s-section>
