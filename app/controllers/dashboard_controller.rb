@@ -4,7 +4,6 @@
 # This supports any AJAX requests from the Polaris UI.
 #
 class DashboardController < AuthenticatedController
-  include ShopifyApp::EmbeddedApp
 
   def stats
     shop = current_shop

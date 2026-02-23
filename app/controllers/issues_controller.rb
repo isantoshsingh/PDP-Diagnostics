@@ -7,7 +7,6 @@
 #   - Acknowledge issues
 #
 class IssuesController < AuthenticatedController
-  include ShopifyApp::EmbeddedApp
 
   before_action :set_shop
   before_action :set_issue, only: [:show, :acknowledge]

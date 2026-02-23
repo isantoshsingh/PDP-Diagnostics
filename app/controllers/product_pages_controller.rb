@@ -8,7 +8,6 @@
 #   - Trigger manual rescans
 #
 class ProductPagesController < AuthenticatedController
-  include ShopifyApp::EmbeddedApp
 
   # Note: set_shop is inherited from AuthenticatedController
   before_action :set_product_page, only: [:show, :status, :destroy, :rescan]

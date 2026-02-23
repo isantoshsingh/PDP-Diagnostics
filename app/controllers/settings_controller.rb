@@ -6,7 +6,6 @@
 #   - Alert email address
 #
 class SettingsController < AuthenticatedController
-  include ShopifyApp::EmbeddedApp
 
   before_action :set_shop
 

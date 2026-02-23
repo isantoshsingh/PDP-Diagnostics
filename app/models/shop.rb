@@ -147,7 +147,7 @@ class Shop < ActiveRecord::Base
       shop_created_at: params[:created_at],
       password_enabled: params[:password_enabled],
       pre_launch_enabled: params[:pre_launch_enabled],
-      shop_json: params.except(:controller, :action, :format, :webhook).to_h
+      shop_json: params.except(:controller, :action, :format, :webhook).to_unsafe_h
     )
   end
 
