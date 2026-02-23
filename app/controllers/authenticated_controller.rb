@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 class AuthenticatedController < ApplicationController
+  include ShopifyApp::EmbeddedApp
   include ShopifyApp::EnsureHasSession
+
   before_action :set_shop
   before_action :set_host
 

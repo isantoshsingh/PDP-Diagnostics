@@ -4,7 +4,6 @@
 # Shows subscription status, trial information, or exemption status.
 #
 class BillingController < AuthenticatedController
-  include ShopifyApp::EmbeddedApp
 
   before_action :set_shop
 

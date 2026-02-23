@@ -282,7 +282,7 @@ _(Per section 5.G.)_
 - **Billing:** All charges go through the Shopify Billing API.
 - **Scopes:** `read_products`, `read_themes` (read-only).
 - **No customer data:** The app does not access orders, customers, or checkout data.
-- **Webhooks:** Handles `app_uninstalled`, `app_subscription_update`, and `shop_update`.
+- **Webhooks:** Handles `app_uninstalled`, and `shop_update`.
 - **Embedded app:** Uses Shopify App Bridge, session tokens, Polaris Web Components.
 - **Phase 1 only:** The listing must not reference auto-fix, SEO, or optimization features — those are planned for future phases.
 

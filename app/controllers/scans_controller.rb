@@ -3,7 +3,6 @@
 # ScansController displays scan history and details.
 #
 class ScansController < AuthenticatedController
-  include ShopifyApp::EmbeddedApp
 
   before_action :set_shop
   before_action :set_scan, only: [:show]

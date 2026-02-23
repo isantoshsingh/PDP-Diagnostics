@@ -3,8 +3,10 @@
 Rails.application.routes.draw do
   # Webhook handlers (must be before ShopifyApp::Engine)
   post '/webhooks/app_uninstalled', to: 'webhooks/app_uninstalled#create'
-  post '/webhooks/app_subscription_update', to: 'webhooks/app_subscription_update#create'
   post '/webhooks/shop_update', to: 'webhooks/shop_update#create'
+  post '/webhooks/customers_data_request', to: 'webhooks/compliance#customers_data_request'
+  post '/webhooks/customers_redact', to: 'webhooks/compliance#customers_redact'
+  post '/webhooks/shop_redact', to: 'webhooks/compliance#shop_redact'
 
   # Shopify App Engine (OAuth, etc.)
   mount ShopifyApp::Engine, at: "/"

@@ -10,7 +10,6 @@
 #   - Quick actions
 #
 class HomeController < AuthenticatedController
-  include ShopifyApp::EmbeddedApp
 
   def index
     # Use @shop from set_shop callback (already loaded in AuthenticatedController)

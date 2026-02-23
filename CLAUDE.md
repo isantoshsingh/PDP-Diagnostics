@@ -133,7 +133,6 @@ All authenticated controllers inherit from `AuthenticatedController`, which incl
 
 Handled at `/webhooks/*`:
 - `app_uninstalled` — Cleanup on app removal
-- `app_subscription_update` — Track billing changes
 - `shop_update` — Update shop metadata
 
 ## Conventions

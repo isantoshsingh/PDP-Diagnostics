@@ -18,8 +18,7 @@ ShopifyApp.configure do |config|
   
   # Webhooks are configured in shopify.app.toml and handled by controllers
   # config.webhooks = [
-  #   { topic: "app/uninstalled", path: "webhooks/app_uninstalled" },
-  #   { topic: "app_subscriptions/update", path: "webhooks/app_subscription_update" }
+  #   { topic: "app/uninstalled", path: "webhooks/app_uninstalled" }
   # ]
 
 
