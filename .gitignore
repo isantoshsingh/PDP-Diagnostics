@@ -7,8 +7,9 @@
 # Ignore bundler config.
 /.bundle
 
-# Ignore all environment files.
+# Ignore all environment files (except examples).
 /.env*
+!/.env.production.example
 
 # Ignore all logfiles and tempfiles.
 /log/*
@@ -30,7 +31,7 @@
 
 /public/assets
 
-# Ignore Node.js dependencies (installed by Heroku Node.js buildpack for puppeteer-ruby).
+# Ignore Node.js dependencies.
 /node_modules
 
 # Ignore key files for decrypting credentials and more.
