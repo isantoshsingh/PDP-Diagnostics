@@ -66,6 +66,7 @@ class BrowserService
   # Launches the browser instance (local) or connects to remote (Browserless)
   # Uses Browserless.io cloud browser when BROWSERLESS_URL is set (production).
   # Falls back to local Chrome launch when not set (development).
+  # In production, REFUSES to launch local Chrome (would cause R14 memory crash).
   def start
     return if @started
 
@@ -79,8 +80,11 @@ class BrowserService
         )
         @remote_browser = true
         Rails.logger.info("[BrowserService] Connected to remote browser (Browserless)")
+      elsif Rails.env.production?
+        # NEVER launch local Chrome in production — it uses ~350MB and crashes the dyno
+        raise BrowserError, "BROWSERLESS_URL is not set. Cannot launch local Chrome in production (would cause R14 memory crash). Set BROWSERLESS_URL to use Browserless.io."
       else
-        # Launch local Chrome for development
+        # Launch local Chrome for development only
         @browser = Puppeteer.launch(
           headless: @options[:headless],
           args: browser_launch_args
@@ -90,6 +94,8 @@ class BrowserService
       end
       @started = true
       self
+    rescue BrowserError
+      raise # Don't retry config errors
     rescue StandardError => e
       if retries < 1
         retries += 1
