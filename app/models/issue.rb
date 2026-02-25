@@ -4,8 +4,11 @@
 # Issues are created by the detection engine after a scan.
 #
 # Issue types:
-#   - missing_add_to_cart: ATC button not found or not clickable
-#   - variant_selector_error: Variant picker not working
+#   - missing_add_to_cart: ATC button not found, hidden, or permanently disabled
+#   - atc_not_functional: ATC button clicks but cart doesn't update
+#   - checkout_broken: Checkout page fails to load after adding to cart
+#   - variant_selection_broken: Cannot select product variants
+#   - variant_selector_error: Variant picker JS errors
 #   - js_error: JavaScript error on page load
 #   - liquid_error: Liquid template error
 #   - missing_images: Product images not loading
@@ -52,12 +55,27 @@ class Issue < ApplicationRecord
   scope :by_type, ->(type) { where(issue_type: type) }
   scope :alertable, -> { open.high_severity.where("occurrence_count >= ?", 2) }
 
-  # Issue type configuration
+# Issue type configuration
   ISSUE_TYPES = {
     "missing_add_to_cart" => {
       severity: "high",
-      title: "Add to Cart button may not be working",
-      description: "We couldn't find a working Add to Cart button on this page. Customers may not be able to purchase this product."
+      title: "Add to Cart button is not working",
+      description: "The Add to Cart button is missing, hidden, or permanently disabled. Customers cannot purchase this product."
+    },
+    "atc_not_functional" => {
+      severity: "high",
+      title: "Add to Cart is not adding items",
+      description: "The Add to Cart button exists and can be clicked, but items are not being added to the cart. Customers cannot complete purchases."
+    },
+    "checkout_broken" => {
+      severity: "high",
+      title: "Checkout page is not loading",
+      description: "After adding a product to cart, the checkout page failed to load correctly. Customers cannot complete their purchase."
+    },
+    "variant_selection_broken" => {
+      severity: "high",
+      title: "Product variant selection is not working",
+      description: "Customers cannot select product options (size, color, etc.). This may prevent them from adding the product to cart."
     },
     "variant_selector_error" => {
       severity: "high",

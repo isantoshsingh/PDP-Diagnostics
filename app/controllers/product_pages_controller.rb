@@ -193,8 +193,8 @@ class ProductPagesController < AuthenticatedController
     if @product_page.scans.running.any?
       flash[:notice] = "A scan is already in progress for this page."
     else
-      ScanPdpJob.perform_later(@product_page.id)
-      flash[:success] = "Manual scan started for #{@product_page.title}."
+      ScanPdpJob.perform_later(@product_page.id, scan_depth: "deep")
+      flash[:success] = "Deep scan started for #{@product_page.title}."
     end
 
     redirect_to product_page_path(@product_page, host: params[:host])

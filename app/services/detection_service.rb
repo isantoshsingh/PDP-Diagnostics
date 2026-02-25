@@ -24,6 +24,9 @@ class DetectionService
   # Maps detector check names to issue types
   CHECK_TO_ISSUE_TYPE = {
     "add_to_cart" => "missing_add_to_cart",
+    "atc_funnel" => "atc_not_functional",
+    "checkout" => "checkout_broken",
+    "variant_interaction" => "variant_selection_broken",
     "javascript_errors" => "js_error",
     "liquid_errors" => "liquid_error",
     "price_visibility" => "missing_price",
@@ -33,6 +36,9 @@ class DetectionService
   # Maps detector check names to issue severity
   CHECK_SEVERITY = {
     "add_to_cart" => "high",
+    "atc_funnel" => "high",
+    "checkout" => "high",
+    "variant_interaction" => "high",
     "javascript_errors" => "high",
     "liquid_errors" => "medium",
     "price_visibility" => "high",
