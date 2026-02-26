@@ -319,54 +319,46 @@ class BrowserService
 
     result = evaluate_script(<<~JS)
       () => {
-        // Strategy 1: <select> inside variant-selects or variant-radios (Dawn theme)
-        const variantSelect = document.querySelector(
-          'variant-selects select, variant-radios input, product-form select[name*="option"]'
-        );
-
-        if (variantSelect && variantSelect.tagName === 'SELECT') {
-          // Find the first non-selected, available option
-          const options = Array.from(variantSelect.options);
-          const available = options.find((opt, i) => i > 0 && !opt.disabled);
-          if (available) {
-            variantSelect.value = available.value;
-            variantSelect.dispatchEvent(new Event('change', { bubbles: true }));
-            return { selected: true, variant_name: available.value, method: 'select' };
-          }
-        }
-
-        // Strategy 2: Any <select> with name containing "option" inside product form
-        const formSelect = document.querySelector(
+        // Strategy 1: <select> inside variant-selects, variant-radios, or product-form
+        const selectEl = document.querySelector(
+          'variant-selects select, variant-radios select, product-form select[name*="option"], ' +
           'form[action*="/cart/add"] select[name*="option"], product-form select'
         );
-        if (formSelect && formSelect.tagName === 'SELECT') {
-          const options = Array.from(formSelect.options);
+
+        if (selectEl && selectEl.tagName === 'SELECT') {
+          const options = Array.from(selectEl.options);
           const available = options.find((opt, i) => i > 0 && !opt.disabled);
           if (available) {
-            formSelect.value = available.value;
-            formSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            selectEl.value = available.value;
+            selectEl.dispatchEvent(new Event('change', { bubbles: true }));
             return { selected: true, variant_name: available.value, method: 'select' };
           }
         }
 
-        // Strategy 3: Radio buttons / swatches inside variant wrapper
+        // Strategy 2: Radio buttons inside variant containers
+        // Dawn theme uses radios inside variant-selects OR variant-radios
         const radio = document.querySelector(
+          'variant-selects input[type="radio"]:not(:checked):not(:disabled), ' +
+          'variant-radios input[type="radio"]:not(:checked):not(:disabled), ' +
           '.variant-input-wrapper input[type="radio"]:not(:checked):not(:disabled), ' +
-          'variant-radios input[type="radio"]:not(:checked):not(:disabled)'
+          'product-form input[type="radio"]:not(:checked):not(:disabled), ' +
+          'form[action*="/cart/add"] fieldset input[type="radio"]:not(:checked):not(:disabled)'
         );
         if (radio) {
           radio.click();
+          radio.dispatchEvent(new Event('change', { bubbles: true }));
           return { selected: true, variant_name: radio.value, method: 'radio' };
         }
 
-        // Strategy 4: Swatch buttons (custom themes)
+        // Strategy 3: Swatch buttons / clickable option elements (custom themes)
         const swatch = document.querySelector(
+          '[data-option-value-id]:not(:checked):not(:disabled):not([disabled]), ' +
           '[data-option-value]:not(.is-disabled):not(.disabled):not([disabled]), ' +
           '.swatch-element:not(.soldout) label'
         );
         if (swatch) {
           swatch.click();
-          return { selected: true, variant_name: swatch.textContent?.trim() || '', method: 'swatch' };
+          return { selected: true, variant_name: swatch.textContent?.trim() || swatch.value || '', method: 'swatch' };
         }
 
         // No variant selectors found (might be a simple product with no variants)
