@@ -66,6 +66,38 @@
   </s-grid>
 </s-section>
 
+<% latest_screenshot_scan = @recent_scans.find { |s| s.screenshot_url.present? } %>
+<% if latest_screenshot_scan %>
+<s-box paddingBlockStart="base">
+  <s-section heading="Latest screenshot">
+    <s-box>
+      <img
+        src="<%= latest_screenshot_scan.screenshot_url %>"
+        alt="Latest screenshot of <%= @product_page.title %>"
+        style="max-width: 240px; border: 1px solid var(--p-color-border); border-radius: 8px; cursor: pointer;"
+        onclick="document.getElementById('screenshot-modal-pdp').showOverlay()"
+      />
+      <s-box paddingBlockStart="tight">
+        <s-paragraph>From latest scan &middot; <%= time_ago_in_words(latest_screenshot_scan.created_at) %> ago</s-paragraph>
+      </s-box>
+    </s-box>
+  </s-section>
+</s-box>
+
+<s-modal id="screenshot-modal-pdp" heading="Page Screenshot — <%= @product_page.title %>" size="large" padding="none">
+  <s-box padding="none">
+    <img
+      src="<%= latest_screenshot_scan.screenshot_url %>"
+      alt="Full screenshot of <%= @product_page.title %>"
+      style="width: 100%; display: block;"
+    />
+  </s-box>
+  <s-button slot="secondary-actions" commandFor="screenshot-modal-pdp" command="--hide">
+    Close
+  </s-button>
+</s-modal>
+<% end %>
+
 <!-- Open Issues -->
 <s-box paddingBlockStart="base">
   <s-section heading="Open issues (<%= @open_issues.count %>)">
