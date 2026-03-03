@@ -3,14 +3,22 @@
 # ScreenshotsController serves scan screenshots.
 # Downloads from R2 (production) or local tmp/ (development) and streams to browser.
 # Screenshots are private — served through this controller, never publicly accessible.
-# Authorization: only serves screenshots belonging to the current shop's scans.
 #
-class ScreenshotsController < AuthenticatedController
+# Authorization: Uses signed URLs (MessageVerifier) instead of Shopify session auth.
+# <img> tags make plain GET requests that cannot carry Shopify JWT tokens, so we
+# sign the URL at render time and verify the signature here. The token expires
+# after 24 hours and is tied to a specific scan_id.
+#
+class ScreenshotsController < ApplicationController
   def show
-    # Scope scan lookup to current shop to prevent unauthorized access (IDOR)
-    scan = Scan.joins(product_page: :shop)
-      .where(shops: { id: @shop&.id })
-      .find_by(id: params[:scan_id])
+    # Verify the signed token — prevents unauthorized access without Shopify session
+    verified = Rails.application.message_verifier(:screenshots).verified(params[:token])
+    unless verified.is_a?(Hash) && verified[:scan_id] == params[:scan_id].to_i
+      head :unauthorized
+      return
+    end
+
+    scan = Scan.find_by(id: params[:scan_id])
 
     unless scan&.screenshot_url.present?
       head :not_found
