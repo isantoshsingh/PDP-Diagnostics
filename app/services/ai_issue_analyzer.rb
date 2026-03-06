@@ -114,10 +114,14 @@ class AiIssueAnalyzer
       3. Are product images loading correctly?
       4. Are there any error messages visible on the page?
       5. Is the layout broken or elements overlapping?
-      6. Are there any OTHER critical technical errors that would prevent buying?
 
-      IMPORTANT: Be precise. Only report issues you can actually see in the screenshot.
-      If everything looks fine, return an empty issues array.
+      IMPORTANT RULES:
+      - Be precise. Only report issues you can ACTUALLY SEE in the screenshot.
+      - If everything looks fine, return an empty issues array.
+      - Do NOT infer issues that aren't visible. A JavaScript error in the automated checks does NOT mean checkout is broken.
+      - "checkout_broken" should ONLY be used if the screenshot shows a broken or blank checkout page. Do NOT use it for JavaScript errors on product pages — use "error_message" instead.
+      - "atc_not_functional" should ONLY be used if the Add to Cart button is visually broken, greyed out, or you can see it clearly won't work. Do NOT use it just because automated checks mention JS errors.
+      - If automated checks already flagged an issue (e.g., JavaScript errors), do NOT re-report the same problem under a different, more severe type.
 
       Respond in JSON format only:
       {

@@ -46,21 +46,23 @@ module Detectors
       /vitals\.co/i
     ].freeze
 
-    # Patterns that indicate purchase-flow-critical errors
+    # Patterns that indicate purchase-flow-critical errors.
+    # These must be specific enough to avoid false positives — broad patterns
+    # like /product/i or /shopify/i match nearly every error on a Shopify page.
     CRITICAL_PATTERNS = [
-      /cart/i,
       /add.?to.?cart/i,
+      /cart\.add/i,
+      /cart\.update/i,
+      /cart\.change/i,
       /checkout/i,
-      /product/i,
-      /variant/i,
-      /price/i,
-      /form/i,
-      /submit/i,
+      /variant.?(select|change|update|option)/i,
+      /product.?form/i,
+      /price.?(update|render|display)/i,
+      /form.?submit/i,
       /payment/i,
-      /shopify/i,
-      /buy/i,
+      /buy.?button/i,
       /purchase/i,
-      /quantity/i
+      /quantity.?(select|input|update)/i
     ].freeze
 
     # Patterns that indicate syntax errors (more severe)
