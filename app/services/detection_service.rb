@@ -22,12 +22,10 @@ class DetectionService
   CONFIDENCE_THRESHOLD = 0.7
 
   # When a detector passes, also resolve related issue types that share the
-  # same root cause. Without this, AI-only issue types (e.g., checkout_broken)
-  # or funnel test types (e.g., atc_not_functional) stay open forever because
-  # no detector directly maps to them.
+  # same root cause. Without this, funnel test types (e.g., atc_not_functional)
+  # stay open forever because no detector directly maps to them.
   RELATED_RESOLUTION_MAP = {
-    "missing_add_to_cart" => %w[atc_not_functional],
-    "js_error" => %w[checkout_broken]
+    "missing_add_to_cart" => %w[atc_not_functional]
   }.freeze
 
   # Maps detector check names to issue types

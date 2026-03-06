@@ -120,9 +120,9 @@ class ScanPipelineService
 
   # Issue types that share a root cause — if programmatic detection already found
   # one type in this group, the AI shouldn't create a separate issue for another
-  # type in the same group. Prevents AI from escalating e.g. js_error → checkout_broken.
+  # type in the same group.
   RELATED_ISSUE_GROUPS = [
-    %w[js_error checkout_broken variant_selection_broken],
+    %w[js_error variant_selection_broken],
     %w[missing_add_to_cart atc_not_functional]
   ].freeze
 
