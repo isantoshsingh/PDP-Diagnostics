@@ -16,15 +16,16 @@ class ShopSetting < ApplicationRecord
 
   # Validations
   validates :scan_frequency, inclusion: { in: %w[daily weekly] }
-  validates :max_monitored_pages, numericality: { greater_than: 0, less_than_or_equal_to: 5 }
+  validates :max_monitored_pages, numericality: { greater_than: 0, less_than_or_equal_to: Shop::MAX_MONITORED_PAGES }
   validates :shop_id, uniqueness: true
 
   # Default values set in migration, but ensure they're set
   after_initialize :set_defaults, if: :new_record?
 
-  # Returns the alert email, falling back to shop email
+  # Returns the alert email, falling back to shop's actual email address.
+  # shop.email is populated from Shopify webhook data (shop owner's email).
   def effective_alert_email
-    alert_email.presence || shop.shopify_domain
+    alert_email.presence || shop.email.presence
   end
 
   private
@@ -33,6 +34,6 @@ class ShopSetting < ApplicationRecord
     self.email_alerts_enabled = true if email_alerts_enabled.nil?
     self.admin_alerts_enabled = true if admin_alerts_enabled.nil?
     self.scan_frequency ||= "daily"
-    self.max_monitored_pages ||= 5
+    self.max_monitored_pages ||= Shop::MAX_MONITORED_PAGES
   end
 end
