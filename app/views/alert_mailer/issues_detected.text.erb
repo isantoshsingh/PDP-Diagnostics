@@ -1,0 +1,27 @@
+We noticed something on your product page
+==========================================
+
+Hi there,
+
+Prowl detected <%= @issues.length == 1 ? "a potential issue" : "#{@issues.length} potential issues" %> on "<%= @product_page.title %>" that may affect your customers' ability to purchase.
+
+<% @issues.each_with_index do |issue, i| %>
+Issue <%= i + 1 %>: <%= issue.title %>
+<%= "-" * 60 %>
+<%= issue.merchant_explanation %>
+<% if issue.merchant_suggested_fix.present? %>
+
+Suggested fix:
+<%= issue.merchant_suggested_fix %>
+<% end %>
+<% if issue.ai_confirmed == true && issue.ai_confidence.present? %>
+🤖 AI confirmed this issue with <%= (issue.ai_confidence * 100).round %>% confidence.
+<% end %>
+
+<% end %>
+We recommend reviewing the page to ensure customers can complete their purchase.
+
+View page details: <%= @app_url %>
+
+---
+We only alert you when we're confident there's a real issue. This helps us avoid false alarms.

@@ -75,17 +75,17 @@ class ScanPipelineService
     end
   end
 
-  # Step 4: Send alerts for any alertable issues (AI-confirmed = immediate)
+  # Step 4: Send ONE batched alert email covering all alertable issues on this page.
+  # AlertService deduplicates per-issue so even if called multiple times, no double-sending.
   def send_alerts
-    issues.each do |issue|
-      issue.reload
-      next unless issue.should_alert?
+    fresh_issues = issues.map(&:reload)
+    alertable = fresh_issues.select(&:should_alert?)
+    return if alertable.empty?
 
-      begin
-        AlertService.new(issue).perform
-      rescue StandardError => e
-        Rails.logger.error("[ScanPipeline] AlertService failed for issue #{issue.id}: #{e.message}")
-      end
+    begin
+      AlertService.new(alertable).perform
+    rescue StandardError => e
+      Rails.logger.error("[ScanPipeline] AlertService failed: #{e.message}")
     end
   end
 

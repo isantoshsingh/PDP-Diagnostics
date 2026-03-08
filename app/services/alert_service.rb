@@ -1,94 +1,92 @@
 # frozen_string_literal: true
 
 # AlertService handles sending notifications to merchants about detected issues.
-# 
+#
 # Alert types:
 #   - Email alerts: Sent to shop owner email
 #   - Admin notifications: Shopify admin notification
 #
-# Rules (per agent.md):
+# Rules:
 #   - Only alert for HIGH severity issues
-#   - Only alert after issue persists across 2 scans (avoid noise)
-#   - Never send duplicate alerts for same issue
+#   - Only alert after issue persists across 2 scans OR is AI-confirmed
+#   - Never send duplicate alerts for the same issue
+#   - Batch all alertable issues from a single scan into ONE email
 #
 class AlertService
-  attr_reader :shop, :issue
+  attr_reader :shop, :issues
 
-  def initialize(issue)
-    @issue = issue
-    @shop = issue.shop
+  # Initialize with one or more issues from the same product page / same scan run.
+  # Pass an array to batch multiple issues into a single email.
+  def initialize(issues)
+    @issues = Array(issues)
+    @shop = @issues.first.shop
   end
 
-  # Checks if issue should be alerted and sends appropriate alerts
+  # Send batched email (and admin) alerts covering all new alertable issues.
+  # Issues that already have an alert record are skipped — avoids double-sending.
   def perform
-    return unless issue.should_alert?
     return unless shop.billing_active?
 
-    alerts_sent = []
+    alertable = issues.select { |i| i.should_alert? }
+    return if alertable.empty?
 
-    # Send email alert if enabled
     if shop.shop_setting&.email_alerts_enabled?
-      alert = send_email_alert
-      alerts_sent << alert if alert
+      send_batched_email_alert(alertable)
     end
 
-    # Send admin notification if enabled
     if shop.shop_setting&.admin_alerts_enabled?
-      alert = send_admin_notification
-      alerts_sent << alert if alert
+      alertable.each { |issue| send_admin_notification(issue) }
     end
-
-    alerts_sent
   end
 
   private
 
-  def send_email_alert
-    # Check if email alert already exists for this issue
-    return if existing_alert?("email")
-
-    alert = create_alert("email")
-    return unless alert # Race condition: another process already created it
-
-    begin
-      AlertMailer.issue_detected(shop, issue).deliver_later
-      alert.mark_sent!
-      Rails.logger.info("[AlertService] Email alert sent for issue #{issue.id} to shop #{shop.id}")
-    rescue StandardError => e
-      alert.mark_failed!
-      Rails.logger.error("[AlertService] Failed to send email alert: #{e.message}")
+  # Send ONE email covering all alertable issues together.
+  # Creates individual Alert records for each issue first (for dedup tracking),
+  # then sends a single batched email.
+  def send_batched_email_alert(alertable_issues)
+    # Create alert records for each issue (dedup guard)
+    created_alerts = alertable_issues.filter_map do |issue|
+      next if existing_alert?(issue, "email")
+      create_alert(issue, "email")
     end
 
-    alert
-  end
-
-  def send_admin_notification
-    # Check if admin alert already exists for this issue
-    return if existing_alert?("admin")
-
-    alert = create_alert("admin")
-    return unless alert # Race condition: another process already created it
+    return if created_alerts.empty? # All already alerted
 
     begin
-      # Use Shopify Admin API to send notification
-      # In Phase 1, we'll log it - full implementation requires App Bridge
-      Rails.logger.info("[AlertService] Admin notification for issue #{issue.id} would be sent to shop #{shop.id}")
+      # Use the first issue's product page + scan for context (all from same page)
+      AlertMailer.issues_detected(shop, alertable_issues).deliver_later
+      created_alerts.each(&:mark_sent!)
+      Rails.logger.info(
+        "[AlertService] Batched email alert sent for #{created_alerts.length} issue(s) on " \
+        "product page #{alertable_issues.first.product_page_id} to shop #{shop.id}"
+      )
+    rescue StandardError => e
+      created_alerts.each(&:mark_failed!)
+      Rails.logger.error("[AlertService] Failed to send batched email alert: #{e.message}")
+    end
+  end
 
-      # Mark as sent - in production, this would happen after API confirmation
+  def send_admin_notification(issue)
+    return if existing_alert?(issue, "admin")
+
+    alert = create_alert(issue, "admin")
+    return unless alert
+
+    begin
+      Rails.logger.info("[AlertService] Admin notification for issue #{issue.id} would be sent to shop #{shop.id}")
       alert.mark_sent!
     rescue StandardError => e
       alert.mark_failed!
       Rails.logger.error("[AlertService] Failed to send admin notification: #{e.message}")
     end
-
-    alert
   end
 
-  def existing_alert?(alert_type)
+  def existing_alert?(issue, alert_type)
     Alert.exists?(shop: shop, issue: issue, alert_type: alert_type)
   end
 
-  def create_alert(alert_type)
+  def create_alert(issue, alert_type)
     Alert.create!(
       shop: shop,
       issue: issue,
@@ -96,7 +94,6 @@ class AlertService
       delivery_status: "pending"
     )
   rescue ActiveRecord::RecordNotUnique
-    # Race condition: another process already created this alert
     Rails.logger.info("[AlertService] Alert already exists for issue #{issue.id} (#{alert_type}), skipping")
     nil
   end
