@@ -57,7 +57,14 @@ module Detectors
       /mailchimp/i,
       /omnisend/i,
       /privy/i,
-      /vitals\.co/i
+      /vitals\.co/i,
+      # Shopify's own analytics/telemetry infrastructure — these errors are
+      # background beacon failures (ad-blockers, network blips) and have
+      # NO impact on the storefront purchase flow.
+      /\/cdn\/wpm\//i,              # Shopify Web Pixel Manager (WPM)
+      /shopifycloud\/shop-js/i,     # Shop Pay / Shop JS modules
+      /shop_events_listener/i,      # Shopify storefront event listener
+      /shopifycloud\/storefront/i,  # Shopify storefront CDN assets
     ].freeze
 
     # Patterns that indicate purchase-flow-critical errors.

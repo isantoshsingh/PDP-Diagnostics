@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_25_173147) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_02_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -25,7 +25,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_25_173147) do
     t.index ["alert_type"], name: "index_alerts_on_alert_type"
     t.index ["delivery_status"], name: "index_alerts_on_delivery_status"
     t.index ["issue_id"], name: "index_alerts_on_issue_id"
-    t.index ["shop_id", "issue_id"], name: "index_alerts_on_shop_id_and_issue_id", unique: true
+    t.index ["shop_id", "issue_id", "alert_type"], name: "index_alerts_on_shop_issue_and_type", unique: true
     t.index ["shop_id"], name: "index_alerts_on_shop_id"
   end
 
@@ -51,6 +51,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_25_173147) do
     t.string "status", default: "open", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
+    t.index ["ai_confirmed"], name: "index_issues_on_ai_confirmed_true", where: "(ai_confirmed = true)"
     t.index ["product_page_id", "issue_type", "status"], name: "index_issues_on_product_page_id_and_issue_type_and_status"
     t.index ["product_page_id", "status"], name: "index_issues_on_product_page_id_and_status"
     t.index ["product_page_id"], name: "index_issues_on_product_page_id"
@@ -98,6 +99,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_25_173147) do
     t.datetime "updated_at", null: false
     t.index ["product_page_id", "created_at"], name: "index_scans_on_product_page_id_and_created_at"
     t.index ["product_page_id"], name: "index_scans_on_product_page_id"
+    t.index ["scan_depth"], name: "index_scans_on_scan_depth"
     t.index ["started_at"], name: "index_scans_on_started_at"
     t.index ["status"], name: "index_scans_on_status"
   end

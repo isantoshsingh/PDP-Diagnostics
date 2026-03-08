@@ -413,7 +413,7 @@ class BrowserService
   def read_cart_state
     ensure_page_loaded!
 
-    result = evaluate_script(<<~JS)
+    result = evaluate_script(<<~JS, timeout_ms: 10_000)
       async () => {
         try {
           const response = await fetch('/cart.js', {
@@ -455,7 +455,7 @@ class BrowserService
     # Sanitize line_item_key to prevent JS injection — only allow safe characters
     sanitized_key = line_item_key.to_s.gsub(/[^a-zA-Z0-9_:\-]/, "")
 
-    result = evaluate_script(<<~JS)
+    result = evaluate_script(<<~JS, timeout_ms: 10_000)
       async () => {
         try {
           const response = await fetch('/cart/change.js', {

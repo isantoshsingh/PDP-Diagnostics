@@ -112,7 +112,20 @@ class ProductPageScanner
 
   def start_browser
     if @browser_service.nil?
-      @browser_service = BrowserService.new
+      # Deep scans use fetch('/cart.js') inside page.evaluate() for the full
+      # purchase funnel test (read_cart_state, clear_cart_item). When request
+      # interception is ON, this creates a deadlock: the Ruby thread blocks on
+      # evaluate() while the intercepted request handler also needs the Ruby
+      # thread to call request.continue(). Disabling interception for deep
+      # scans avoids this. Quick scans don't need in-page fetch so they keep
+      # interception ON for faster page loads.
+      browser_options = if @scan_depth == :deep
+        { block_unnecessary_resources: false }
+      else
+        {}
+      end
+
+      @browser_service = BrowserService.new(browser_options)
     end
 
     @browser_service.start unless @browser_service.started?
