@@ -190,23 +190,35 @@ Click any issue to see its detail page, which includes:
 
 ### Acknowledging Issues
 
-If you've reviewed an issue and determined it doesn't need action (e.g., intentionally sold-out products), click the **Acknowledge** button. Acknowledged issues:
+**Acknowledging an issue is the only way to stop receiving alert emails for it.** As long as a high-severity issue remains open and unacknowledged, Prowl will continue to send alert emails on every scan where the issue is detected.
 
-- Are suppressed from future alerts.
-- Still appear in your issues list under the "acknowledged" filter.
-- Can be acknowledged directly from alert emails without logging in, via a signed link.
+If you've reviewed an issue and determined it doesn't need action (e.g., intentionally sold-out products, a known theme behavior, or an issue you're already working on), click the **Acknowledge** button. Acknowledged issues:
+
+- **Stop triggering alert emails and admin notifications** — this is immediate and permanent for that issue.
+- Still appear in your issues list under the "acknowledged" filter so you don't lose track of them.
+- Can be acknowledged directly from alert emails without logging in, via a signed link (valid for 30 days).
+
+If you do not acknowledge an issue, Prowl will re-alert you on each subsequent scan where the issue persists. This is by design — unacknowledged high-severity issues represent potential lost revenue and warrant repeated attention until addressed or explicitly dismissed.
 
 ### Resolved Issues
 
-When a subsequent scan no longer detects the problem, Prowl automatically marks the issue as resolved and sends a "all clear" email notification. Resolved issues remain in your history for reference.
+When a subsequent scan no longer detects the problem, Prowl automatically marks the issue as resolved and sends an "all clear" email notification. Resolved issues remain in your history for reference. If the same problem re-appears later, it is created as a new issue with fresh alerting — previous acknowledgements do not carry over.
 
 ## Settings
 
 ### Alert Preferences
 
-- **Email alerts** (default: on) — Receive batched email notifications for high-severity issues. All alertable issues from a scan are grouped into a single email with screenshots attached.
-- **Admin alerts** (default: on) — Receive notifications in your Shopify admin.
-- **Alert email** (optional) — Specify a custom email address for alerts. If not set, alerts go to the shop owner email.
+- **Email alerts** (default: on) — Receive batched email notifications for high-severity issues. All alertable issues from a scan are grouped into a single email with screenshots attached inline. Turning this off disables all Prowl alert emails.
+- **Admin alerts** (default: on) — Receive notifications in your Shopify admin panel.
+- **Alert email** (optional) — Specify a custom email address for alerts (e.g., a shared team inbox). If not set, alerts go to the shop owner email registered with Shopify.
+
+**How alert emails work:**
+
+- Each scan produces **one batched email** containing all high-severity issues found, not one email per issue.
+- Emails include the scan **screenshot** as an inline attachment so you can see exactly what Prowl saw.
+- Each email contains a **signed acknowledge link** per issue — click it to silence future alerts for that issue without logging in (link expires after 30 days).
+- **Prowl will keep sending alert emails** for any unacknowledged high-severity issue on every scan where it is detected. To stop emails for a specific issue, you must [acknowledge it](#acknowledging-issues).
+- When all issues on a product page are resolved, Prowl sends an **"all clear" email** confirming the page is healthy again.
 
 ### Scan Frequency
 

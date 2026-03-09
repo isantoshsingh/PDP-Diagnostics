@@ -210,19 +210,29 @@ All alertable issues from a single scan are batched into one email. Email failur
 5. **Occurrence threshold** — Non-AI-confirmed issues require 2 or more scan occurrences before alerting. If this is the first time an issue was detected, wait for the next scan.
 6. **Acknowledged issues** — If you previously acknowledged the issue, alerts are suppressed. Check the issues list with the "acknowledged" filter.
 
-### Too Many Alerts
+### Too Many Alerts / How to Stop Alert Emails
 
-Prowl batches all alertable issues from a single scan into one email. If you're receiving frequent emails:
+Prowl batches all alertable issues from a single scan into one email. However, **unacknowledged high-severity issues will re-trigger alert emails on every scan** where they are detected. This is intentional — unresolved purchase-blocking issues warrant repeated attention.
 
-1. **Switch to weekly scans** — Go to **Settings** and change scan frequency from daily to weekly.
-2. **Acknowledge known issues** — If an issue is expected (e.g., a temporarily sold-out product), acknowledge it to suppress future alerts.
-3. **Fix underlying issues** — Resolving the detected problems is the best way to stop alerts.
+**To stop alert emails for a specific issue:**
 
-### Alert for a Non-Issue
+1. **Acknowledge the issue** — This is the only way to silence alerts for an individual issue. You can acknowledge from:
+   - The issue detail page in the Prowl dashboard (click **Acknowledge**).
+   - The signed link in the alert email itself (no login required, valid for 30 days).
+2. **Fix the issue** — Once a subsequent scan no longer detects the problem, Prowl resolves it automatically and stops alerting.
+
+**To reduce overall alert frequency:**
+
+3. **Switch to weekly scans** — Go to **Settings** and change scan frequency from daily to weekly. Fewer scans means fewer alert emails.
+4. **Disable email alerts entirely** — Go to **Settings** and toggle email alerts off. You will still see issues in the dashboard but receive no emails.
+
+**Common scenario:** You're receiving daily emails about the same issue. This means the issue is still being detected on every scan and hasn't been acknowledged. Either fix the root cause, or acknowledge the issue to stop the emails.
+
+### Alert for a Non-Issue (False Positive)
 
 If Prowl alerted you about something that isn't actually a problem:
 
-1. **Acknowledge the issue** — Click Acknowledge on the issue detail page or use the signed link in the alert email (works without logging in, valid for 30 days).
+1. **Acknowledge the issue** — Click Acknowledge on the issue detail page or use the signed link in the alert email (works without logging in, valid for 30 days). **This immediately and permanently stops alert emails for that issue.**
 2. **Check the confidence score** — Issues at the 0.7 threshold are more likely to be edge cases. Prowl requires high confidence before alerting.
 3. **Review the screenshot** — The scan screenshot attached to the alert email shows exactly what Prowl saw. This may reveal a transient issue (e.g., slow CDN) that has since resolved.
 
@@ -310,8 +320,14 @@ Alerts are only sent for HIGH severity issues. Medium and low severity issues ar
 **Why did I get an alert on the first scan?**
 If the AI independently confirmed the issue, alerting happens immediately without waiting for a second scan occurrence.
 
+**How do I stop getting emails about the same issue?**
+Acknowledge the issue. You can do this from the issue detail page in the dashboard, or by clicking the acknowledge link in the alert email (no login needed). Once acknowledged, Prowl permanently stops sending alerts for that issue. Alternatively, fix the issue — once a scan no longer detects it, Prowl resolves it automatically.
+
 **Can I get alerts re-enabled for an acknowledged issue?**
-Acknowledged issues remain in your issues list with the "acknowledged" status. If the same problem re-appears after being resolved, it will be created as a new issue with fresh alerting.
+Not directly. Acknowledged issues stay silenced. However, if the same problem re-appears after being resolved (i.e., the issue was resolved and then detected again), Prowl creates it as a new issue with fresh alerting.
+
+**Why do I keep getting emails even though I know about the issue?**
+Prowl re-alerts on every scan for unacknowledged high-severity issues. This is by design — purchase-blocking issues should not be silently ignored. Acknowledge the issue to stop the emails.
 
 **What happens when I remove a monitored page?**
 The page is soft-deleted. Scan history and issues are preserved. You can restore the page later.
