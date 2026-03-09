@@ -18,6 +18,8 @@ Suggested fix:
 🤖 AI confirmed this issue with <%= (issue.ai_confidence * 100).round %>% confidence.
 <% end %>
 
+Stop alerts for this issue: <%= @acknowledge_urls[issue.id] %>
+
 <% end %>
 We recommend reviewing the page to ensure customers can complete their purchase.
 

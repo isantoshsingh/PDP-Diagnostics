@@ -19,6 +19,13 @@ class AlertMailer < ApplicationMailer
     @scan = @issues.first.scan
     @app_url = "#{ENV.fetch('HOST', 'https://localhost:3000')}/product_pages/#{@product_page.id}"
 
+    # Generate signed acknowledge URLs for each issue (expire in 30 days)
+    host = ENV.fetch('HOST', 'https://localhost:3000')
+    @acknowledge_urls = @issues.each_with_object({}) do |issue, hash|
+      signed_id = issue.signed_id(purpose: :acknowledge, expires_in: 30.days)
+      hash[issue.id] = "#{host}/email_actions/acknowledge/#{signed_id}"
+    end
+
     # Attach screenshot inline if available (use first issue's scan screenshot)
     @has_screenshot = false
     if @scan&.screenshot_url.present?

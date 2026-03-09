@@ -27,6 +27,10 @@
     🤖 AI confirmed this issue with <%= (issue.ai_confidence * 100).round %>% confidence.
   </p>
   <% end %>
+
+  <div style="margin-top: 12px;">
+    <a href="<%= @acknowledge_urls[issue.id] %>" style="color: #6d7175; font-size: 12px; text-decoration: underline;">I'm aware — stop alerting me about this</a>
+  </div>
 </div>
 <% end %>
 

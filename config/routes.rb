@@ -44,6 +44,9 @@ Rails.application.routes.draw do
 
 
 
+  # Email actions (public, token-based auth — no Shopify session needed)
+  get "/email_actions/acknowledge/:signed_id", to: "email_actions#acknowledge_issue", as: :email_acknowledge_issue
+
   # Privacy Policy (public, no auth required)
   get "/privacy", to: "privacy#show", as: :privacy
 
