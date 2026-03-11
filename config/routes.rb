@@ -44,12 +44,22 @@ Rails.application.routes.draw do
 
 
 
+  # Email actions (public, token-based auth — no Shopify session needed)
+  get "/email_actions/acknowledge/:signed_id", to: "email_actions#acknowledge_issue", as: :email_acknowledge_issue
+
+  # Support portal (public, no auth required)
+  get "/support", to: "support#index", as: :support
+  get "/support/faq", to: "support#faq", as: :support_faq
+  get "/support/contact", to: "support#contact", as: :support_contact
+  post "/support/contact", to: "support#submit_contact", as: :support_submit_contact
+  get "/support/articles/:article", to: "support#show", as: :support_article
+
   # Privacy Policy (public, no auth required)
   get "/privacy", to: "privacy#show", as: :privacy
 
   # Health check
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Screenshots (for development - in production use S3/CDN)
-  get "/screenshots/:filename", to: "screenshots#show", as: :screenshot
+  # Screenshots (served from R2 in production, local in dev)
+  get "/screenshots/:scan_id", to: "screenshots#show", as: :screenshot
 end

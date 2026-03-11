@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_19_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_08_113938) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -19,19 +19,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_19_120000) do
     t.datetime "created_at", null: false
     t.string "delivery_status", default: "pending", null: false
     t.bigint "issue_id", null: false
+    t.bigint "scan_id"
     t.datetime "sent_at"
     t.bigint "shop_id", null: false
     t.datetime "updated_at", null: false
     t.index ["alert_type"], name: "index_alerts_on_alert_type"
     t.index ["delivery_status"], name: "index_alerts_on_delivery_status"
     t.index ["issue_id"], name: "index_alerts_on_issue_id"
-    t.index ["shop_id", "issue_id"], name: "index_alerts_on_shop_id_and_issue_id", unique: true
+    t.index ["scan_id"], name: "index_alerts_on_scan_id"
+    t.index ["shop_id", "issue_id", "alert_type", "scan_id"], name: "index_alerts_on_shop_issue_type_scan", unique: true
     t.index ["shop_id"], name: "index_alerts_on_shop_id"
   end
 
   create_table "issues", force: :cascade do |t|
     t.datetime "acknowledged_at"
     t.string "acknowledged_by"
+    t.float "ai_confidence"
+    t.boolean "ai_confirmed"
+    t.text "ai_explanation"
+    t.text "ai_reasoning"
+    t.text "ai_suggested_fix"
+    t.datetime "ai_verified_at"
     t.datetime "created_at", null: false
     t.text "description"
     t.text "evidence"
@@ -45,6 +53,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_19_120000) do
     t.string "status", default: "open", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
+    t.index ["ai_confirmed"], name: "index_issues_on_ai_confirmed_true", where: "(ai_confirmed = true)"
     t.index ["product_page_id", "issue_type", "status"], name: "index_issues_on_product_page_id_and_issue_type_and_status"
     t.index ["product_page_id", "status"], name: "index_issues_on_product_page_id_and_status"
     t.index ["product_page_id"], name: "index_issues_on_product_page_id"
@@ -79,17 +88,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_19_120000) do
     t.datetime "created_at", null: false
     t.text "dom_checks_data"
     t.text "error_message"
+    t.jsonb "funnel_results", default: {}
     t.text "html_snapshot"
     t.text "js_errors"
     t.text "network_errors"
     t.integer "page_load_time_ms"
     t.bigint "product_page_id", null: false
+    t.string "scan_depth", default: "quick"
     t.string "screenshot_url"
     t.datetime "started_at"
     t.string "status", default: "pending", null: false
     t.datetime "updated_at", null: false
     t.index ["product_page_id", "created_at"], name: "index_scans_on_product_page_id_and_created_at"
     t.index ["product_page_id"], name: "index_scans_on_product_page_id"
+    t.index ["scan_depth"], name: "index_scans_on_scan_depth"
     t.index ["started_at"], name: "index_scans_on_started_at"
     t.index ["status"], name: "index_scans_on_status"
   end
@@ -99,7 +111,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_19_120000) do
     t.string "alert_email"
     t.datetime "created_at", null: false
     t.boolean "email_alerts_enabled", default: true, null: false
-    t.integer "max_monitored_pages", default: 5, null: false
+    t.integer "max_monitored_pages", default: 3, null: false
     t.string "scan_frequency", default: "daily", null: false
     t.bigint "shop_id", null: false
     t.datetime "updated_at", null: false
@@ -288,6 +300,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_19_120000) do
   end
 
   add_foreign_key "alerts", "issues"
+  add_foreign_key "alerts", "scans"
   add_foreign_key "alerts", "shops"
   add_foreign_key "issues", "product_pages"
   add_foreign_key "issues", "scans"

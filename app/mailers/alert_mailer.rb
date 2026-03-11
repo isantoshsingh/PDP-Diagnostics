@@ -6,18 +6,48 @@
 #   - Calm and non-alarming (per UX principles)
 #   - Clear and actionable
 #   - Infrequent (only for confirmed high severity issues)
+#   - Include screenshot evidence when available
+#   - Include AI-generated plain-language explanations
 #
 class AlertMailer < ApplicationMailer
-  # Sent when a high severity issue is detected twice
-  def issue_detected(shop, issue)
+  # Sent when one or more high severity issues are detected on a product page.
+  # Accepts a list of issues so multiple issues can be batched into a single email.
+  def issues_detected(shop, issues)
     @shop = shop
-    @issue = issue
-    @product_page = issue.product_page
-    @app_url = "#{ENV.fetch('HOST', 'https://localhost:3000')}/issues/#{issue.id}"
+    @issues = Array(issues)
+    @product_page = @issues.first.product_page
+    @scan = @issues.first.scan
+    @app_url = "#{ENV.fetch('HOST', 'https://localhost:3000')}/product_pages/#{@product_page.id}"
+
+    # Generate signed acknowledge URLs for each issue (expire in 30 days)
+    host = ENV.fetch('HOST', 'https://localhost:3000')
+    @acknowledge_urls = @issues.each_with_object({}) do |issue, hash|
+      signed_id = issue.signed_id(purpose: :acknowledge, expires_in: 30.days)
+      hash[issue.id] = "#{host}/email_actions/acknowledge/#{signed_id}"
+    end
+
+    # Attach screenshot inline if available (use first issue's scan screenshot)
+    @has_screenshot = false
+    if @scan&.screenshot_url.present?
+      begin
+        screenshot_data = ScreenshotUploader.new.download(@scan.screenshot_url)
+        attachments.inline["screenshot.png"] = screenshot_data
+        @has_screenshot = true
+      rescue StandardError => e
+        Rails.logger.warn("[AlertMailer] Failed to attach screenshot: #{e.message}")
+      end
+    end
+
+    issue_count = @issues.length
+    subject = if issue_count == 1
+      "Prowl: Issue detected on #{@product_page.title}"
+    else
+      "Prowl: #{issue_count} issues detected on #{@product_page.title}"
+    end
 
     mail(
-      to: shop.shop_setting&.effective_alert_email || shop.shopify_domain,
-      subject: "Prowl: Issue detected on #{@product_page.title}"
+      to: shop.shop_setting&.effective_alert_email || shop.email,
+      subject: subject
     )
   end
 
@@ -28,7 +58,7 @@ class AlertMailer < ApplicationMailer
     @app_url = "#{ENV.fetch('HOST', 'https://localhost:3000')}/product_pages/#{product_page.id}"
 
     mail(
-      to: shop.shop_setting&.effective_alert_email || shop.shopify_domain,
+      to: shop.shop_setting&.effective_alert_email || shop.email,
       subject: "Prowl: #{@product_page.title} is now healthy"
     )
   end

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prowl - Issue Acknowledged</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f6f6f7;
+      margin: 0;
+      padding: 40px 20px;
+      color: #202223;
+    }
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .icon { font-size: 48px; margin-bottom: 16px; }
+    h1 { font-size: 20px; margin-bottom: 8px; }
+    p { color: #6d7175; font-size: 15px; line-height: 1.5; }
+    .subtle { font-size: 13px; color: #8c9196; margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <% if @error %>
+      <div class="icon">⚠️</div>
+      <h1>Link expired</h1>
+      <p><%= @error %></p>
+    <% elsif @already_acknowledged %>
+      <div class="icon">👍</div>
+      <h1>Already acknowledged</h1>
+      <p>"<%= @issue_title %>" on <strong><%= @product_title %></strong> was already acknowledged. You won't receive further alerts for this issue.</p>
+    <% elsif @acknowledged %>
+      <div class="icon">✅</div>
+      <h1>Issue acknowledged</h1>
+      <p>"<%= @issue_title %>" on <strong><%= @product_title %></strong> has been acknowledged. You won't receive further alerts for this issue unless it resolves and comes back.</p>
+      <p class="subtle">We'll continue monitoring this page silently.</p>
+    <% end %>
+  </div>
+</body>
+</html>

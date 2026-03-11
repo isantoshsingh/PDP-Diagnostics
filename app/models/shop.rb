@@ -11,6 +11,8 @@
 class Shop < ActiveRecord::Base
   include ShopifyApp::ShopSessionStorage
 
+  MAX_MONITORED_PAGES = 3
+
   # Associations
   has_many :product_pages, dependent: :destroy
   has_one :shop_setting, dependent: :destroy
@@ -113,7 +115,7 @@ class Shop < ActiveRecord::Base
 
   # Checks if the shop can add more monitored pages
   def can_add_monitored_page?
-    monitored_pages_count < (shop_setting&.max_monitored_pages || 5)
+    monitored_pages_count < (shop_setting&.max_monitored_pages || MAX_MONITORED_PAGES)
   end
 
   # Returns a friendly display name for the shop
@@ -121,12 +123,16 @@ class Shop < ActiveRecord::Base
     shop_owner.presence || shopify_domain
   end
 
-  # Marks shop as reinstalled
+  # Marks shop as reinstalled.
+  # Resets subscription_status so check_billing treats it as a fresh install
+  # (the uninstall webhook sets it to 'cancelled', which would otherwise persist).
   def reinstall!
     update!(
       installed: true,
       installed_at: installed_at || Time.current,
-      uninstalled_at: nil
+      uninstalled_at: nil,
+      subscription_status: "none",
+      subscription_plan: nil
     )
   end
 
@@ -158,7 +164,7 @@ class Shop < ActiveRecord::Base
       email_alerts_enabled: true,
       admin_alerts_enabled: true,
       scan_frequency: "daily",
-      max_monitored_pages: 5
+      max_monitored_pages: MAX_MONITORED_PAGES
     )
   end
 end

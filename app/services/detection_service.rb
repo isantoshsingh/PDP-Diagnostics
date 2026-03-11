@@ -21,9 +21,19 @@ class DetectionService
   SLOW_PAGE_THRESHOLD_MS = 5000 # 5 seconds
   CONFIDENCE_THRESHOLD = 0.7
 
+  # When a detector passes, also resolve related issue types that share the
+  # same root cause. Without this, funnel test types (e.g., atc_not_functional)
+  # stay open forever because no detector directly maps to them.
+  RELATED_RESOLUTION_MAP = {
+    "missing_add_to_cart" => %w[atc_not_functional]
+  }.freeze
+
   # Maps detector check names to issue types
   CHECK_TO_ISSUE_TYPE = {
     "add_to_cart" => "missing_add_to_cart",
+    "atc_funnel" => "atc_not_functional",
+    "checkout" => "checkout_broken",
+    "variant_interaction" => "variant_selection_broken",
     "javascript_errors" => "js_error",
     "liquid_errors" => "liquid_error",
     "price_visibility" => "missing_price",
@@ -33,6 +43,9 @@ class DetectionService
   # Maps detector check names to issue severity
   CHECK_SEVERITY = {
     "add_to_cart" => "high",
+    "atc_funnel" => "high",
+    "checkout" => "high",
+    "variant_interaction" => "high",
     "javascript_errors" => "high",
     "liquid_errors" => "medium",
     "price_visibility" => "high",
@@ -75,18 +88,19 @@ class DetectionService
     scan.product_page
   end
 
-  # Process structured results from the new detection engine
+  # Process structured results from the new detection engine.
+  # Results arrive with symbol keys (normalized by Scan#parsed_dom_checks_data).
   def process_detection_results(results)
     results.each do |result|
-      check = result["check"] || result[:check]
-      status = result["status"] || result[:status]
-      confidence = (result["confidence"] || result[:confidence]).to_f
-      details = result["details"] || result[:details] || {}
+      check = result[:check]
+      status = result[:status]
+      confidence = result[:confidence].to_f
+      details = result[:details] || {}
 
       issue_type = CHECK_TO_ISSUE_TYPE[check]
       next unless issue_type
 
-      message = details["message"] || details[:message] || ""
+      message = details[:message] || ""
       evidence = build_evidence(result)
 
       case status
@@ -114,6 +128,8 @@ class DetectionService
         end
       when "pass"
         resolve_existing_issue(issue_type)
+        # Also resolve related issue types (e.g., passing add_to_cart resolves atc_not_functional)
+        RELATED_RESOLUTION_MAP.fetch(issue_type, []).each { |related| resolve_existing_issue(related) }
       when "inconclusive"
         # Don't resolve or create - leave existing state unchanged
         Rails.logger.info("[DetectionService] Inconclusive result for #{check}, skipping")
@@ -122,12 +138,12 @@ class DetectionService
   end
 
   def build_evidence(result)
-    details = result["details"] || result[:details] || {}
+    details = result[:details] || {}
     {
-      confidence: result["confidence"] || result[:confidence],
-      technical_details: details["technical_details"] || details[:technical_details] || {},
-      suggestions: details["suggestions"] || details[:suggestions] || [],
-      evidence: details["evidence"] || details[:evidence] || {},
+      confidence: result[:confidence],
+      technical_details: details[:technical_details] || {},
+      suggestions: details[:suggestions] || [],
+      evidence: details[:evidence] || {},
       scan_id: scan.id
     }
   end
@@ -327,23 +343,39 @@ class DetectionService
     existing = product_page.issues.where(issue_type: issue_type, status: ["open", "acknowledged"]).first
 
     if existing
-      existing.record_occurrence!(scan)
-      detected_issues << existing
-    else
-      issue = product_page.issues.create!(
+      merged_issue = existing.merge_new_detection!(
         scan: scan,
-        issue_type: issue_type,
-        severity: severity,
-        title: title,
-        description: description,
-        evidence: evidence,
-        occurrence_count: 1,
-        first_detected_at: Time.current,
-        last_detected_at: Time.current,
-        status: "open"
+        new_severity: severity,
+        new_title: title,
+        new_description: description,
+        new_evidence: evidence
       )
-      detected_issues << issue
+
+      if merged_issue == :de_escalated
+        # De-escalation occurred (old issue was resolved), create a new one at the lower severity
+        create_new_issue(issue_type: issue_type, severity: severity, title: title, description: description, evidence: evidence)
+      elsif merged_issue
+        detected_issues << merged_issue
+      end
+    else
+      create_new_issue(issue_type: issue_type, severity: severity, title: title, description: description, evidence: evidence)
     end
+  end
+
+  def create_new_issue(issue_type:, severity:, title:, description:, evidence:)
+    issue = product_page.issues.create!(
+      scan: scan,
+      issue_type: issue_type,
+      severity: severity,
+      title: title,
+      description: description,
+      evidence: evidence,
+      occurrence_count: 1,
+      first_detected_at: Time.current,
+      last_detected_at: Time.current,
+      status: "open"
+    )
+    detected_issues << issue
   end
 
   def resolve_existing_issue(issue_type)
