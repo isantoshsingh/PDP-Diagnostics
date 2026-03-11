@@ -21,7 +21,7 @@ Rails.application.configure do
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"
 
-  # Heroku terminates SSL at the router level.
+  # Kamal proxy terminates SSL via Let's Encrypt.
   config.assume_ssl = true
   config.force_ssl = true
 
@@ -58,14 +58,13 @@ Rails.application.configure do
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
 
-  # Serve static files since Heroku doesn't have nginx in front.
+  # Thruster serves static files in front of Puma when deployed via Kamal.
   config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"].present?
 
   # Enable DNS rebinding protection and other `Host` header attacks.
-  # On Heroku, allow the .herokuapp.com domain and any custom HOST domain.
+  # Allow the configured HOST domain on DigitalOcean.
   config.hosts = [
-    ENV["HOST"]&.then { |h| URI.parse(h.include?("://") ? h : "https://#{h}").host },
-    /.*\.herokuapp\.com/
+    ENV["HOST"]&.then { |h| URI.parse(h.include?("://") ? h : "https://#{h}").host }
   ].compact
 
   # Skip DNS rebinding protection for the default health check endpoint.

@@ -1,0 +1,81 @@
+# Kamal deployment configuration for Prowl on DigitalOcean
+# Docs: https://kamal-deploy.org
+
+service: prowl
+
+image: prowl/prowl
+
+# Deploy to DigitalOcean droplet(s)
+servers:
+  web:
+    hosts:
+      - <%= ENV["DEPLOY_HOST"] %>
+    options:
+      # Increase shared memory for Chromium headless browser
+      "shm-size": "512m"
+  worker:
+    hosts:
+      - <%= ENV["DEPLOY_HOST"] %>
+    cmd: bundle exec ruby bin/jobs
+    options:
+      "shm-size": "256m"
+
+# Container registry (Docker Hub by default)
+registry:
+  server: ghcr.io
+  username:
+    - KAMAL_REGISTRY_USERNAME
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+# Environment variables injected into all containers
+env:
+  clear:
+    RAILS_ENV: production
+    RAILS_LOG_TO_STDOUT: "enabled"
+    RAILS_SERVE_STATIC_FILES: "enabled"
+    PUPPETEER_EXECUTABLE_PATH: "/usr/bin/chromium"
+    PUPPETEER_SKIP_DOWNLOAD: "true"
+    WEB_CONCURRENCY: "0"
+    RAILS_MAX_THREADS: "3"
+  secret:
+    - RAILS_MASTER_KEY
+    - DATABASE_URL
+    - SHOPIFY_API_KEY
+    - SHOPIFY_API_SECRET
+    - HOST
+
+# PostgreSQL as a Kamal accessory running on the same droplet
+accessories:
+  db:
+    image: postgres:16
+    host: <%= ENV["DEPLOY_HOST"] %>
+    port: "127.0.0.1:5432:5432"
+    env:
+      clear:
+        POSTGRES_DB: prowl_production
+      secret:
+        - POSTGRES_PASSWORD
+    volumes:
+      - /var/lib/prowl/postgres/data:/var/lib/postgresql/data
+
+# Traefik proxy handles SSL via Let's Encrypt
+proxy:
+  ssl: true
+  host: prowl.lucyapps.com
+  app_port: 80
+  healthcheck:
+    interval: 3
+    path: /up
+    timeout: 5
+
+# Builder configuration
+builder:
+  arch: amd64
+
+# Health check to verify app is running
+healthcheck:
+  path: /up
+  port: 80
+  interval: 10
+  max_attempts: 30
